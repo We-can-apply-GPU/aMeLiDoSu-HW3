@@ -9,40 +9,54 @@ import lasagne # will be network later
 import time
 import os
 import itertools
+
 from RNN import RecurrentLayer, RecurrentSoftmaxLayer
+import settings
+
 #impotr util
 #import pickle
 #import random
 
-BATCH_SIZE = 256
-NUM_HIDDEN_UNITS = 512
-LEARNING_RATE = 0.00005
-MOMENTUM = 0.9
-NUM_EPOCHS = 300
-DROPOUT = 0.6
-
 def load_data():
 	#get data 
 	
-    #X_train = np.array([data[1:] for data in fbank]).astype(theano.config.floatX)
-    #Y_train = np.array([data[1] for data in label]).astype('int32')
+        #X_train = np.array([data[1:] for data in fbank]).astype(theano.config.floatX)
+        #Y_train = np.array([data[1] for data in label]).astype('int32')
 
 	return dict(
-        X_train = theano.shared(X_train),
-        Y_train = theano.shared(Y_train),
+                X_train = theano.shared(X_train),
+                Y_train = theano.shared(Y_train),
 		num_train=X_train.shape[0],
 		input_dim=X_train.shape[1],
 		output_dim=OUTPUT_DIM,
 		)	
 
-def build_model(input_dim, output_dim,
-    batch_size=BATCH_SIZE, num_hidden_units=NUM_HIDDEN_UNITS):
+def build_model(bi_directional = False):
+    
+    if bi_direc:
+	l_in = lasagne.layers.InputLayer(
+                shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
 
-    l_in = lasagne.layers.InputLayer(shape=(BATCH_SIZE,input_dim),name="InputLayer")
-    l_recurrent = RecurrentLayer(l_in, num_units=num_hidden_units,name="RecurrentLayer") 
-    l_out = RecurrentSoftmaxLayer(l_recurrent, num_units=output_dim,name="OuptutLayer")
+	l_rec_forward = RecurrentLayer(
+                l_in,num_units=num_hidden_units,name="ForwardLayer") 
 
-	return l_out
+	l_rec_backward = RecurrentLayer(
+                l_in,num_units=NUM_UNITS,backwards=True,name="BackwardLayer") 
+
+	l_rec_combined = lasagne.layers.ElemwiseSumLayer(
+	    incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
+
+	l_out = RecurrentSoftmaxLayer(
+                l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
+    else:
+        l_in = lasagne.layers.InputLayer(
+                shape=(BATCH_SIZE,WORD_2_VEC_FEATURES),name="InputLayer")
+        l_recurrent = RecurrentLayer(
+                l_in, num_units=NUM_UNITS,name="RecurrentLayer") 
+        l_out = RecurrentSoftmaxLayer(
+                l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
+
+    return l_out
 
 def create_iter_functions(data, output_layer,
                           batch_size=BATCH_SIZE,
@@ -63,7 +77,7 @@ def create_iter_functions(data, output_layer,
     accuracy = T.mean(T.eq(pred, y_batch))
 
     all_params = lasagne.layers.get_all_params(output_layer)
-    updates = lasagne.updates.nesterov_rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
+    updates = lasagne.updates.rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
     
     iter_train = theano.function(
       [batch_index], [loss_train, accuracy],
@@ -91,7 +105,7 @@ def main():
     data = load_data()
     print("Building model and compile theano...")
     print(data['num_train'])
-    output_layer = build_model(input_dim = data['input_dim'], output_dim = data['output_dim'])
+    output_layer = build_model(bi_directional = False)
     print 'Creating iter functions'
     iter_funcs = create_iter_functions(data, output_layer)
     print("Training")
