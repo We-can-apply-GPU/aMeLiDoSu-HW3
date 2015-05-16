@@ -11,42 +11,40 @@ import os
 import itertools
 
 from RNN import RecurrentLayer, RecurrentSoftmaxLayer
-import settings
+from settings import *
+
 
 #impotr util
 #import pickle
 #import random
 
 def load_data():
-	#get data 
-	
-        #X_train = np.array([data[1:] for data in fbank]).astype(theano.config.floatX)
-        #Y_train = np.array([data[1] for data in label]).astype('int32')
+    #get data 
 
-	return dict(
-                X_train = theano.shared(X_train),
-                Y_train = theano.shared(Y_train),
-		num_train=X_train.shape[0],
-		input_dim=X_train.shape[1],
-		output_dim=OUTPUT_DIM,
-		)	
+    #X_train = np.array([data[1:] for data in fbank]).astype(theano.config.floatX)
+    #Y_train = np.array([data[1] for data in label]).astype('int32')
+    #return dict(
+            #X_train = theano.shared(X_train),
+            #Y_train = theano.shared(Y_train),
+            #num_train=X_train.shape[0])
+    pass
 
 def build_model(bi_directional = False):
-    
+
     if bi_direc:
-	l_in = lasagne.layers.InputLayer(
+        l_in = lasagne.layers.InputLayer(
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
 
-	l_rec_forward = RecurrentLayer(
+        l_rec_forward = RecurrentLayer(
                 l_in,num_units=num_hidden_units,name="ForwardLayer") 
 
-	l_rec_backward = RecurrentLayer(
+        l_rec_backward = RecurrentLayer(
                 l_in,num_units=NUM_UNITS,backwards=True,name="BackwardLayer") 
 
-	l_rec_combined = lasagne.layers.ElemwiseSumLayer(
-	    incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
+        l_rec_combined = lasagne.layers.ElemwiseSumLayer(
+                incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
 
-	l_out = RecurrentSoftmaxLayer(
+        l_out = RecurrentSoftmaxLayer(
                 l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
     else:
         l_in = lasagne.layers.InputLayer(
@@ -58,17 +56,17 @@ def build_model(bi_directional = False):
 
     return l_out
 
-def create_iter_functions(data, output_layer,
-                          batch_size=BATCH_SIZE,
-                          learning_rate=LEARNING_RATE,
-                          momentum=MOMENTUM):
+def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
+                          learning_rate=LEARNING_RATE,momentum=MOMENTUM):
+
     batch_index = T.iscalar('batch_index')
     X_batch = T.matrix('x')
     y_batch = T.ivector('y')
 
     batch_slice = slice(batch_index * BATCH_SIZE, (batch_index + 1) * BATCH_SIZE)
 
-    objective = lasagne.objectives.Objective(output_layer, loss_function=lasagne.objectives.categorical_crossentropy)
+    objective = lasagne.objectives.Objective(output_layer, 
+            loss_function=lasagne.objectives.categorical_crossentropy)
 
     loss_train = objective.get_loss(X_batch, target=y_batch)
     loss_eval = objective.get_loss(X_batch, target=y_batch, deterministic=True)
@@ -78,36 +76,39 @@ def create_iter_functions(data, output_layer,
 
     all_params = lasagne.layers.get_all_params(output_layer)
     updates = lasagne.updates.rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
-    
+
     iter_train = theano.function(
-      [batch_index], [loss_train, accuracy],
-      updates=updates,
-      givens={
-        X_batch: data['X_train'][batch_slice],
-        y_batch: data['y_train'][batch_slice],
-        },
-      )
+            [batch_index], [loss_train, accuracy],
+            updates=updates,
+            givens={
+                X_batch: data['X_train'][batch_slice],
+                y_batch: data['y_train'][batch_slice],
+                },
+            )
 
     iter_valid = theano.function(
-      [batch_index], [loss_eval, accuracy],
-      givens={
-        X_batch: data['X_valid'][batch_slice],
-        y_batch: data['y_valid'][batch_slice],
-        },
-      )
+            [batch_index], [loss_eval, accuracy],
+            givens={
+                X_batch: data['X_valid'][batch_slice],
+                y_batch: data['y_valid'][batch_slice],
+                },
+            )
 
     return dict(
-      train=iter_train,
-      valid=iter_valid,
-      )
+            train=iter_train,
+            valid=iter_valid,)
+
 def main():
     print("Loading data...")
     data = load_data()
+
     print("Building model and compile theano...")
     print(data['num_train'])
     output_layer = build_model(bi_directional = False)
-    print 'Creating iter functions'
+
+    print ('Creating iter functions')
     iter_funcs = create_iter_functions(data, output_layer)
+
     print("Training")
     now = time.time()
     try:
@@ -141,5 +142,5 @@ def main():
         pass
 
 if __name__ == '__main__':
-   main() 
+    main() 
 

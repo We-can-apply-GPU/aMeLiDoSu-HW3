@@ -32,24 +32,23 @@ class RecurrentSoftmaxLayer(Layer):
         """
 
         super(RecurrentSoftmaxLayer, self).__init__(incoming,name,**kwargs)
-    	self.num_units = num_units
+        self.num_units = num_units
         self.num_grams = self.input_shape[1]
         self.num_features = self.input_shape[0]
-	    self.W = self.create_param(W, (self.num_features, self.num_units), name="W")
-        
+        self.W = self.create_param(W, (self.num_features, self.num_units), name="W")
+
         ##########Issue###############
         self.nonlinearity = nonlinearity
 
     def get_output_shape_for(self, input_shape):
-	    return (input_shape[0], input_shape[1],self.num_units) 
+        return (input_shape[0], input_shape[1],self.num_units) 
         # BATCHSIZE * (# of grams) * (NUM_UNITS @ this layer)   
 
     def get_output_for(self, input, *args, **kwargs):
         #What is tensotdot?? @@
         #-->ref : http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
-	    result = T.tensordot(input, self.W,axes=1)
+        result = T.tensordot(input, self.W,axes=1)
         return self.nonlinearity(result)
-	
 
 class CustomRecurrentLayer(Layer):
 
@@ -112,7 +111,7 @@ class CustomRecurrentLayer(Layer):
 
         #No non-changing variable -> thus,no non_sequence
         #outputs_info is used for initialization
-        #truncate_gradient – truncate_gradient is the number of steps to use in truncated BPTT. 
+        #truncate_gradient is the number of steps to use in truncated BPTT. 
         #If you compute gradients through a scan op, 
         #they are computed using backpropagation through time. 
         #By providing a different value then -1, you choose to use truncated BPTT 
@@ -160,13 +159,13 @@ class RecurrentLayer(CustomRecurrentLayer):
         '''
 
         input_shape = incoming.get_output_shape()
-        
+
         #One gram in each step
         input_to_hid = DenseLayer(InputLayer((input_shape[0],) + (input_shape[2],)),
                                   num_units,W = W_i,b=b,nonlinearity = nonlinearity)
 
         hid_to_hid = DenseLayer(InputLayer((input_shape[0], num_units),
-                                num_units,W = W_h, b=None,nonlinearity=nonlinearity)
+                                num_units,W = W_h, b=None,nonlinearity=nonlinearity))
 
         super(RecurrentLayer, self).__init__(
             incoming, name,input_to_hid, hid_to_hid, nonlinearity=nonlinearity,
