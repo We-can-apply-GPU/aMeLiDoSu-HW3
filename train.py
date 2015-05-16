@@ -63,7 +63,7 @@ def create_iter_functions(data, output_layer,
     accuracy = T.mean(T.eq(pred, y_batch))
 
     all_params = lasagne.layers.get_all_params(output_layer)
-    updates = lasagne.updates.nesterov_momentum( loss_train, all_params, LEARNING_RATE, MOMENTUM)
+    updates = lasagne.updates.nesterov_rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
     
     iter_train = theano.function(
       [batch_index], [loss_train, accuracy],
