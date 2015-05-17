@@ -1,3 +1,4 @@
+from . import init
 from . import nonlinearities
 from . import layers
 from . import objectives

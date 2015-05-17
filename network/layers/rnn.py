@@ -1,13 +1,13 @@
 import numpy as np
 import theano
 import theano.tensor as T
-import lasagne
-from lasagne import nonlinearities, init, utils
 
-from lasagne.layers.base import Layer
-from lasagne.layers.input import InputLayer
-from lasagne.layers.dense import DenseLayer
-from lasagne.layers import helper
+from .. import nonlinearities, init, utils
+
+from .base import Layer
+from .input import InputLayer
+from .dense import DenseLayer
+import helper
 
 
 class RecurrentSoftmaxLayer(Layer):
