@@ -5,12 +5,11 @@ import sys
 import numpy as np
 import theano
 import theano.tensor as T
-import lasagne # will be network later
+import network
 import time
 import os
 import itertools
 
-from RNN import RecurrentLayer, RecurrentSoftmaxLayer
 from settings import *
 
 
@@ -32,26 +31,26 @@ def load_data():
 def build_model(bi_directional = False):
 
     if bi_direc:
-        l_in = lasagne.layers.InputLayer(
+        l_in = network.layers.InputLayer(
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
 
-        l_rec_forward = RecurrentLayer(
-                l_in,num_units=num_hidden_units,name="ForwardLayer") 
+        l_rec_forward = network.layers.RecurrentLayer(
+                l_in,num_units=num_hidden_units,name="ForwardLayer")
 
-        l_rec_backward = RecurrentLayer(
-                l_in,num_units=NUM_UNITS,backwards=True,name="BackwardLayer") 
+        l_rec_backward = network.layers.RecurrentLayer(
+                l_in,num_units=NUM_UNITS,backwards=True,name="BackwardLayer")
 
-        l_rec_combined = lasagne.layers.ElemwiseSumLayer(
+        l_rec_combined = network.layers.ElemwiseSumLayer(
                 incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
 
-        l_out = RecurrentSoftmaxLayer(
+        l_out = network.layers.RecurrentSoftmaxLayer(
                 l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
     else:
-        l_in = lasagne.layers.InputLayer(
+        l_in = network.layers.InputLayer(
                 shape=(BATCH_SIZE,WORD_2_VEC_FEATURES),name="InputLayer")
-        l_recurrent = RecurrentLayer(
-                l_in, num_units=NUM_UNITS,name="RecurrentLayer") 
-        l_out = RecurrentSoftmaxLayer(
+        l_recurrent = network.layers.RecurrentLayer(
+                l_in, num_units=NUM_UNITS,name="RecurrentLayer")
+        l_out = network.layers.RecurrentSoftmaxLayer(
                 l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
 
     return l_out
@@ -65,8 +64,8 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
 
     batch_slice = slice(batch_index * BATCH_SIZE, (batch_index + 1) * BATCH_SIZE)
 
-    objective = lasagne.objectives.Objective(output_layer, 
-            loss_function=lasagne.objectives.categorical_crossentropy)
+    objective = network.objectives.Objective(output_layer,
+            loss_function=network.objectives.categorical_crossentropy)
 
     loss_train = objective.get_loss(X_batch, target=y_batch)
     loss_eval = objective.get_loss(X_batch, target=y_batch, deterministic=True)
@@ -74,8 +73,8 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
     accuracy = T.mean(T.eq(pred, y_batch))
 
-    all_params = lasagne.layers.get_all_params(output_layer)
-    updates = lasagne.updates.rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
+    all_params = network.layers.get_all_params(output_layer)
+    updates = network.updates.rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
 
     iter_train = theano.function(
             [batch_index], [loss_train, accuracy],
@@ -135,12 +134,12 @@ def main():
 
         #write model
         fout = open("model/5d/{:.2f}".format(avg_valid_accu * 100), "w")
-        pickle.dump(lasagne.layers.get_all_param_values(output_layer), fout)
+        pickle.dump(network.layers.get_all_param_values(output_layer), fout)
         now = time.time()
 
     except KeyboardInterrupt:
         pass
 
 if __name__ == '__main__':
-    main() 
+    main()
 

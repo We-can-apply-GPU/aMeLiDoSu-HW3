@@ -14,7 +14,6 @@ class RecurrentSoftmaxLayer(Layer):
 
     def __init__(self, incoming, name,num_units,W=init.Uniform(),
                  b=init.Constant(0.),nonlinearity=nonlinearities.softmax, **kwargs):
-     
         """
         An output layer for recurrent specifically.
 
@@ -55,14 +54,13 @@ class CustomRecurrentLayer(Layer):
     def __init__(self, incoming,name ,input_to_hid, hid_to_hid,
                  nonlinearity=nonlinearities.rectify,
                  hid_init=init.Constant(0.), backwards=False,trace_steps=-1):
-        
         '''
         An bottom  layer for RecurrentLayer.
 
         Parameters
         ----------
-        From slide p.6 
-            - input_to_hid  
+        From slide p.6
+            - input_to_hid
             - hid_to_hid
             - backwards : boolean
                 If True, process the sequence backwards(used in biDirectional)
@@ -80,7 +78,6 @@ class CustomRecurrentLayer(Layer):
 
         # Get batchSize and num_units at high level
         # num_batches == input_shape[0]
-        
         # Initialize hidden state
         self.hid_init = self.create_param(hid_init,self.input_to_hid.get_output_shape())
 
@@ -123,7 +120,7 @@ class CustomRecurrentLayer(Layer):
         # So, we need to dimshuffle to (nGrams, n_batch, n_features)
         input = input.dimshuffle(1, 0, 2)
         sequences = input
-        
+
         #Refer to the order od theano.scan ~ seqs -> output_info -> nonseqs
         output = theano.scan(fn=step, sequences=sequences,
                              go_backwards=self.backwards,
