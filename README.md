@@ -5,7 +5,8 @@ ref :
 https://code.google.com/p/pygoogle
 
 Data preprocessing
-./preprocessing <training data 路徑> <training data filename or -a（路徑下所有檔案）>
+./preprocessing <training data 路徑> <training data filename or -a（路徑下所有檔案）
+
 會產生一個train_pro.txt，可以給word2vec使用
 
 
