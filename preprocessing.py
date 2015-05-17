@@ -27,7 +27,10 @@ def iofile():
         art = open('train.txt','r')
         _str = ''
         for line in art:
-            _str = _str + unicode(line[5:-5], errors = 'ignore')
+            if(isinstance(line[5:-5], str)):
+                _str = _str + line[5:-5]
+            else:
+                _str = _str + unicode(line[5:-5], errors = 'ignore')
     art = open('train_pro.txt','w')
     art.write(_str)
 
