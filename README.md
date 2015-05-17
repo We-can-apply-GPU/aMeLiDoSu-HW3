@@ -10,6 +10,10 @@ Data preprocessing
 
 會產生一個train_pro.txt，可以給word2vec使用
 
+Feature extract
+
+output為一個dic,傳入vocab,可以回傳他的feature。import extract之後，extract.extract(dim ,training data, trained)，如果已經執行過一次，產生過.bin檔，trained那邊可直接傳入true，word2vec就不用在跑一次了。For example:extract.extract(100, 'train_pro.txt', 'true') 
+
 
 ###Issue need to solve :
 1. 目前 outputLayer是以softMax做nonlinearity，但今天她代表的是機率，跟我們從word2vec得到的R^m vector是不同的東西
