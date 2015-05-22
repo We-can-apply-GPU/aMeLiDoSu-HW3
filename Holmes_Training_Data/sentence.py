@@ -2,19 +2,21 @@ def getsen (s = 'flurried'):
     d = open('allsen')
     w = open(s,'w+')
     ls = []
+    count = 0
     lsofls=[]
     for i in d:
+        i = i.rstrip()
         j = i.split()
         if s in j:
-            w.write(i)
-            ls.append(i.rstrip())
-            if len(ls) == batchsize:
+            w.write(i+'\n')
+            count+= len(j)-3
+            if count> batchsize:
                 lsofls.append(ls)
                 ls = []
+                count = len(j)-3
+            ls.append(i)
     if len(ls) != 0:
-        for i in range( batchsize-len(ls)):
-            ls.append(ls[-1])
         lsofls.append(ls)
     return lsofls
-batchsize = 10
-ls = getsen('fortune')
+batchsize = 100
+ls = getsen('swear')
