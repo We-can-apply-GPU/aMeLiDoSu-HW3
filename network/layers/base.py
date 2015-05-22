@@ -95,20 +95,9 @@ class Layer(object):
         """
         Deprecated. Use `layer.output_shape`.
         """
-        import warnings
-        warnings.warn("layer.get_output_shape() is deprecated and will be "
-                      "removed for the first release of Lasagne. Please use "
-                      "layer.output_shape instead.")
         return self.output_shape
 
     def get_output(self, input=None, **kwargs):
-        """
-        Deprecated. Use `lasagne.layers.get_output(layer, input, **kwargs)`.
-        """
-        import warnings
-        warnings.warn("layer.get_output(...) is deprecated and will be "
-                      "removed for the first release of Lasagne. Please use "
-                      "lasagne.layers.get_output(layer, ...) instead.")
         from .helper import get_output
         return get_output(self, input, **kwargs)
 
@@ -153,15 +142,6 @@ class Layer(object):
         -------
         output : Theano expression
             The output of this layer given the input to this layer.
-
-
-        Notes
-        -----
-        This is called by the base :meth:`lasagne.layers.get_output()`
-        to propagate data through a network.
-
-        This method should be overridden when implementing a new
-        :class:`Layer` class. By default it raises `NotImplementedError`.
         """
         raise NotImplementedError
 
@@ -182,7 +162,7 @@ class Layer(object):
         spec : Theano shared variable, numpy array or callable
             an initializer for this parameter variable. This should initialize
             the variable with an array of the specified shape. See
-            :func:`lasagne.utils.create_param` for more information.
+            :func:`utils.create_param` for more information.
 
         shape : tuple of int
             a tuple of integers representing the desired shape of the
@@ -314,7 +294,7 @@ class MergeLayer(Layer):
 
         Notes
         -----
-        This is called by the base :meth:`lasagne.layers.get_output()`
+        This is called by the base :meth:`layers.get_output()`
         to propagate data through a network.
 
         This method should be overridden when implementing a new

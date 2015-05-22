@@ -46,24 +46,6 @@ def get_all_layers(layer, treat_as_input=None):
         a list of :class:`Layer` instances feeding into the given
         instance(s) either directly or indirectly, and the given
         instance(s) themselves, in topological order.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer, DenseLayer
-    >>> l_in = InputLayer((100, 20))
-    >>> l1 = DenseLayer(l_in, num_units=50)
-    >>> get_all_layers(l1) == [l_in, l1]
-    True
-    >>> l2 = DenseLayer(l_in, num_units=10)
-    >>> get_all_layers([l2, l1]) == [l_in, l2, l1]
-    True
-    >>> get_all_layers([l1, l2]) == [l_in, l1, l2]
-    True
-    >>> l3 = DenseLayer(l2, num_units=20)
-    >>> get_all_layers(l3) == [l_in, l2, l3]
-    True
-    >>> get_all_layers(l3, treat_as_input=[l2]) == [l2, l3]
-    True
     """
     import warnings
     warnings.warn("get_all_layers() has been changed to return layers in "

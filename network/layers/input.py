@@ -41,11 +41,6 @@ class InputLayer(Layer):
     prediction function, but the compiled function will not accept data of a
     different batch size at runtime. To compile for a variable batch size, set
     the first shape element to `None` instead.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer
-    >>> l_in = InputLayer((100, 20))
     """
     def __init__(self, shape, input_var=None, name=None, **kwargs):
         self.shape = shape

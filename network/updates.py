@@ -28,24 +28,6 @@ tensor variable:
 This can be used to constrain the norm of parameters (as an alternative
 to weight decay), or for a form of gradient clipping.
 
-Examples
---------
->>> import lasagne
->>> import theano.tensor as T
->>> import theano
->>> from lasagne.nonlinearities import softmax
->>> from lasagne.layers import InputLayer, DenseLayer, get_output
->>> from lasagne.updates import sgd, apply_momentum
->>> l_in = InputLayer((100, 20))
->>> l1 = DenseLayer(l_in, num_units=3, nonlinearity=softmax)
->>> x = T.matrix('x')  # shp: num_batch x num_features
->>> y = T.ivector('y') # shp: num_batch
->>> l_out = get_output(l1, x)
->>> params = lasagne.layers.get_all_params(l1)
->>> loss = T.mean(T.nnet.categorical_crossentropy(l_out, y))
->>> updates_sgd = sgd(loss, params, learning_rate=0.0001)
->>> updates = apply_momentum(updates_sgd, params, momentum=0.9)
->>> train_function = theano.function([x, y], updates=updates)
 """
 
 from collections import OrderedDict
@@ -599,20 +581,6 @@ def norm_constraint(tensor_var, max_norm, norm_axes=None, epsilon=1e-7):
     TensorVariable
         Input `tensor_var` with rescaling applied to weight vectors
         that violate the specified constraints.
-
-    Examples
-    --------
-    >>> param = theano.shared(
-    ...     np.random.randn(100, 200).astype(theano.config.floatX))
-    >>> update = param + 100
-    >>> update = norm_constraint(update, 10)
-    >>> func = theano.function([], [], updates=[(param, update)])
-    >>> # Apply constrained update
-    >>> _ = func()
-    >>> from lasagne.utils import compute_norms
-    >>> norms = compute_norms(param.get_value())
-    >>> np.isclose(np.max(norms), 10)
-    True
 
     Notes
     -----

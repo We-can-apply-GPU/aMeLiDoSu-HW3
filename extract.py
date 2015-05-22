@@ -20,7 +20,7 @@ def extract(dim, data, trained):
     features = model.vectors
     dic = dict(zip(keys,features))
     print(len(dic))
-    return dic    
-    
+    return dic
+
 if __name__=="__main__":
     extract(dim, data, true)
