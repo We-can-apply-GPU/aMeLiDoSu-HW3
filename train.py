@@ -21,8 +21,8 @@ def load_data():
 
     X_train ,Y_train = iodata.iodata()
     return dict(
-            X_train = theano.shared(np.array(X_train)),
-            Y_train = theano.shared(np.array(Y_train)),
+            X_train = theano.shared(np.array(X_train).astype(np.float32)),
+            Y_train = theano.shared(np.array(Y_train).astype(np.float32)),
             num_train=len(X_train))
 
 def build_model(bi_directional = False):
@@ -59,7 +59,6 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     X_batch = T.tensor3('x')
     y_batch = T.tensor3('y')
 
-    batch_slice = slice(batch_index * 1, (batch_index + 1) * 1)
 
     objective = network.objectives.Objective(output_layer,
             loss_function=network.objectives.categorical_crossentropy)
@@ -77,8 +76,8 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
             [batch_index], [loss_train, accuracy],
             updates=updates,
             givens={
-                X_batch: data['X_train'][batch_slice],
-                y_batch: data['Y_train'][batch_slice],
+                X_batch: data['X_train'][batch_index],
+                y_batch: data['Y_train'][batch_index],
                 },
             )
 
@@ -120,10 +119,10 @@ def main():
         if epoch % 10 == 0:
             batch_valid_accus = []
             batch_valid_losses = []
-        for b in range(num_batches_train):
-            batch_valid_loss, batch_valid_accu = iter_funcs['valid'](b)
-            batch_valid_losses.append(batch_valid_loss)
-            batch_valid_accus.append(batch_valid_accu)
+        #for b in range(num_batches_train):
+            #batch_valid_loss, batch_valid_accu = iter_funcs['valid'](b)
+            #batch_valid_losses.append(batch_valid_loss)
+            #batch_valid_accus.append(batch_valid_accu)
         avg_valid_loss = np.mean(batch_valid_losses)
         avg_valid_accu = np.mean(batch_valid_accus)
         print("--validation loss:\t\t{:.2f}".format(avg_valid_loss))

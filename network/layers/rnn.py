@@ -33,7 +33,7 @@ class RecurrentSoftmaxLayer(Layer):
         super(RecurrentSoftmaxLayer, self).__init__(incoming,name,**kwargs)
         self.num_units = num_units
         self.num_grams = self.input_shape[1]
-        self.num_features = self.input_shape[0]
+        self.num_features = self.input_shape[2]
         self.W = self.add_param(W, (self.num_features, self.num_units), name="W")
         ##########Issue###############
         self.nonlinearity = nonlinearity
@@ -123,11 +123,15 @@ class CustomRecurrentLayer(Layer):
         # but scan requires the iterable dimension to be first
         # So, we need to dimshuffle to (nGrams, n_batch, n_features)
         #print(shape(input))
+        print("~~~~~~~~~~~~~~~~~~~~~~")
+        print(input[0].shape[1])
+        print(input[1].shape[1])
+        print(input[2].shape[1])
+        print("~~~~~~~~~~~~~~~~~~~~~~~")
         input = input.dimshuffle(1, 0, 2)
-        sequences = input
 
         #Refer to the order od theano.scan ~ seqs -> output_info -> nonseqs
-        output = theano.scan(fn=step, sequences=sequences,
+        output = theano.scan(fn=step, sequences=input,
                              go_backwards=self.backwards,
                              outputs_info=[self.hid_init],
                              truncate_gradient=self.trace_steps)[0]
