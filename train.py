@@ -21,8 +21,8 @@ def load_data():
 
     X_train ,Y_train = iodata.iodata()
     return dict(
-            X_train = theano.shared(X_train),
-            Y_train = theano.shared(Y_train),
+            X_train = theano.shared(np.array(X_train)),
+            Y_train = theano.shared(np.array(Y_train)),
             num_train=len(X_train))
 
 def build_model(bi_directional = False):
@@ -32,7 +32,7 @@ def build_model(bi_directional = False):
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
 
         l_rec_forward = network.layers.RecurrentLayer(
-                l_in,num_units=num_hidden_units,name="ForwardLayer")
+                l_in,num_units=NUM_HIDDEN_UNITS,name="ForwardLayer")
 
         l_rec_backward = network.layers.RecurrentLayer(
                 l_in,num_units=NUM_HIDDEN_UNITS,backwards=True,name="BackwardLayer")
@@ -56,10 +56,10 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
                           learning_rate=LEARNING_RATE,momentum=MOMENTUM):
 
     batch_index = T.iscalar('batch_index')
-    X_batch = T.matrix('x')
-    y_batch = T.ivector('y')
+    X_batch = T.tensor3('x')
+    y_batch = T.tensor3('y')
 
-    batch_slice = slice(batch_index * BATCH_SIZE, (batch_index + 1) * BATCH_SIZE)
+    batch_slice = slice(batch_index * 1, (batch_index + 1) * 1)
 
     objective = network.objectives.Objective(output_layer,
             loss_function=network.objectives.categorical_crossentropy)
@@ -78,21 +78,21 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
             updates=updates,
             givens={
                 X_batch: data['X_train'][batch_slice],
-                y_batch: data['y_train'][batch_slice],
+                y_batch: data['Y_train'][batch_slice],
                 },
             )
 
-    iter_valid = theano.function(
-            [batch_index], [loss_eval, accuracy],
-            givens={
-                X_batch: data['X_valid'][batch_slice],
-                y_batch: data['y_valid'][batch_slice],
-                },
-            )
+    #iter_valid = theano.function(
+            #[batch_index], [loss_eval, accuracy],
+            #givens={
+                #X_batch: data['X_valid'][batch_slice],
+                #y_batch: data['y_valid'][batch_slice],
+                #},
+            #)
 
     return dict(
-            train=iter_train,
-            valid=iter_valid,)
+            train=iter_train)
+            #valid=iter_valid,)
 
 def main():
     print("Loading data...")
@@ -109,7 +109,7 @@ def main():
     now = time.time()
     try:
         for epoch in range(NUM_EPOCHS):
-            num_batches_train = data['num_train'] // BATCH_SIZE
+            num_batches_train = data['num_train'] // 1
             batch_train_losses = []
         for b in range(num_batches_train):
             batch_train_loss = iter_funcs['train'](b)

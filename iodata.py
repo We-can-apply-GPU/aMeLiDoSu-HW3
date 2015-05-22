@@ -33,6 +33,8 @@ def iodata():
                             outdata = [dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]]]
                             #indata = [_str[k+0],_str[k+1],_str[k+2]]
                             #outdata = [_str[k+1],_str[k+2],_str[k+3]]
+                            #print("{}    : {}".format(indata,k))
+                            #print(outdata)
                             inlist.append(indata)
                             outlist.append(outdata)
         index = 0
@@ -41,6 +43,7 @@ def iodata():
             outlist.append(outlist[index])
             index = index + 1
         indatalist.append(inlist)
+        #print(indatalist)
         outdatalist.append(outlist)
     return indatalist, outdatalist
 

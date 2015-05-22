@@ -8,7 +8,7 @@ from .base import Layer
 from .input import InputLayer
 from .dense import DenseLayer
 import helper
-
+from settings import *
 
 class RecurrentSoftmaxLayer(Layer):
 
@@ -34,10 +34,10 @@ class RecurrentSoftmaxLayer(Layer):
         self.num_units = num_units
         self.num_grams = self.input_shape[1]
         self.num_features = self.input_shape[0]
-        self.W = self.create_param(W, (self.num_features, self.num_units), name="W")
-
+        self.W = self.add_param(W, (self.num_features, self.num_units), name="W")
         ##########Issue###############
         self.nonlinearity = nonlinearity
+
 
     def get_output_shape_for(self, input_shape):
         return (input_shape[0], input_shape[1],self.num_units) 
@@ -46,8 +46,11 @@ class RecurrentSoftmaxLayer(Layer):
     def get_output_for(self, input, *args, **kwargs):
         #What is tensotdot?? @@
         #-->ref : http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
-        result = T.tensordot(input, self.W,axes=1)
-        return self.nonlinearity(result)
+        act = T.tensordot(input, self.W,axes=1)
+        act = act.reshape((self.input_shape[0]*self.input_shape[1],self.num_units),ndim=2)
+        result = self.nonlinearity(act)
+        result = result.reshape((self.input_shape[0], self.input_shape[1], self.num_units))
+        return result
 
 class CustomRecurrentLayer(Layer):
 
@@ -79,7 +82,8 @@ class CustomRecurrentLayer(Layer):
         # Get batchSize and num_units at high level
         # num_batches == input_shape[0]
         # Initialize hidden state
-        self.hid_init = self.create_param(hid_init,self.input_to_hid.get_output_shape())
+        (n_batch,self.num_units) = self.input_to_hid.get_output_shape()
+        self.hid_init = self.add_param(hid_init,self.input_to_hid.get_output_shape())
 
     def get_params(self):
         params = (helper.get_all_params(self.input_to_hid) +
@@ -118,14 +122,15 @@ class CustomRecurrentLayer(Layer):
         # Input should be provided as (n_batch, nGrams, n_features)
         # but scan requires the iterable dimension to be first
         # So, we need to dimshuffle to (nGrams, n_batch, n_features)
+        #print(shape(input))
         input = input.dimshuffle(1, 0, 2)
         sequences = input
 
         #Refer to the order od theano.scan ~ seqs -> output_info -> nonseqs
         output = theano.scan(fn=step, sequences=sequences,
                              go_backwards=self.backwards,
-                             outputs_info=self.hid_init,
-                             truncate_gradient=self.trace_steps)
+                             outputs_info=[self.hid_init],
+                             truncate_gradient=self.trace_steps)[0]
         # Now, dimshuffle back to (n_batch, n_time_steps, n_features))
         output = output.dimshuffle(1, 0, 2)
 
@@ -161,9 +166,24 @@ class RecurrentLayer(CustomRecurrentLayer):
         input_to_hid = DenseLayer(InputLayer((input_shape[0],) + (input_shape[2],)),
                                   num_units,W = W_i,b=b,nonlinearity = nonlinearity)
 
-        hid_to_hid = DenseLayer(InputLayer((input_shape[0], num_units),
-                                num_units,W = W_h, b=None,nonlinearity=nonlinearity))
+        hid_to_hid = DenseLayer(InputLayer((input_shape[0], num_units)),
+                                num_units,W = W_h,nonlinearity=nonlinearity)
 
         super(RecurrentLayer, self).__init__(
             incoming, name,input_to_hid, hid_to_hid, nonlinearity=nonlinearity,
             hid_init=hid_init, backwards=backwards,trace_steps=trace_steps)
+class ReshapeLayer(Layer):
+    '''ReshapeLayers exist because RecurrentLayers expects a shape of
+    (n_batch, n_time_steps, n_features) but the DenseLayer will flatten
+    that shape to (n_batch, n_time_steps*n_features) by default which is wrong.
+    So, you need to manually reshape before and after using a DenseLayer.
+    '''
+    def __init__(self, input_layer, shape):
+        super(ReshapeLayer, self).__init__(input_layer)
+        self.shape = shape
+
+    def get_output_shape_for(self, input_shape):
+        return self.shape
+
+    def get_output_for(self, input, *args, **kwargs):
+        return input.reshape(self.shape)
