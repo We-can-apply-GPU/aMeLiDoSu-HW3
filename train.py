@@ -9,7 +9,7 @@ import network
 import time
 import os
 import itertools
-
+import iodata
 from settings import *
 
 
@@ -18,19 +18,16 @@ from settings import *
 #import random
 
 def load_data():
-    #get data 
 
-    #X_train = np.array([data[1:] for data in fbank]).astype(theano.config.floatX)
-    #Y_train = np.array([data[1] for data in label]).astype('int32')
-    #return dict(
-            #X_train = theano.shared(X_train),
-            #Y_train = theano.shared(Y_train),
-            #num_train=X_train.shape[0])
-    pass
+    X_train ,Y_train = iodata.iodata()
+    return dict(
+            X_train = theano.shared(X_train),
+            Y_train = theano.shared(Y_train),
+            num_train=len(X_train))
 
 def build_model(bi_directional = False):
 
-    if bi_direc:
+    if bi_directional:
         l_in = network.layers.InputLayer(
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
 
@@ -38,7 +35,7 @@ def build_model(bi_directional = False):
                 l_in,num_units=num_hidden_units,name="ForwardLayer")
 
         l_rec_backward = network.layers.RecurrentLayer(
-                l_in,num_units=NUM_UNITS,backwards=True,name="BackwardLayer")
+                l_in,num_units=NUM_HIDDEN_UNITS,backwards=True,name="BackwardLayer")
 
         l_rec_combined = network.layers.ElemwiseSumLayer(
                 incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
@@ -47,9 +44,9 @@ def build_model(bi_directional = False):
                 l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
     else:
         l_in = network.layers.InputLayer(
-                shape=(BATCH_SIZE,WORD_2_VEC_FEATURES),name="InputLayer")
+                shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
         l_recurrent = network.layers.RecurrentLayer(
-                l_in, num_units=NUM_UNITS,name="RecurrentLayer")
+                l_in, num_units=NUM_HIDDEN_UNITS,name="RecurrentLayer")
         l_out = network.layers.RecurrentSoftmaxLayer(
                 l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
 

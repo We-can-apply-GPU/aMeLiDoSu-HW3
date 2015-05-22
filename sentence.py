@@ -1,6 +1,7 @@
+from  settings  import *
 def getsen (s = 'flurried'):
-    d = open('allsen')
-    w = open(s,'w+')
+    d = open('data/allsen')
+    #w = open(s,'w+')
     ls = []
     count = 0
     lsofls=[]
@@ -8,7 +9,7 @@ def getsen (s = 'flurried'):
         i = i.rstrip()
         j = i.split()
         if s in j:
-            w.write(i+'\n')
+            #w.write(i+'\n')
             count+= len(j)-3
             if count> batchsize:
                 lsofls.append(ls)
@@ -18,5 +19,5 @@ def getsen (s = 'flurried'):
     if len(ls) != 0:
         lsofls.append(ls)
     return lsofls
-batchsize = 100
-ls = getsen('swear')
+batchsize = BATCH_SIZE
+#ls = getsen('swear')

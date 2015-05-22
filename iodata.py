@@ -21,14 +21,20 @@ def iodata():
         for j in range(0, len(_list[i])):
             _str = _list[i][j].split()
             for k in range(0, len(_str)):
-                if(len(_str)>NGRAMS):
-                    if((len(_str)-k)>NGRAMS):
-                        #indata = [dic[_str[k]],dic[_str[k+1]],dic[_str[k+2]]]
-                        #outdata = [dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]]]
-                        indata = [_str[k+0],_str[k+1],_str[k+2]]
-                        outdata = [_str[k+1],_str[k+2],_str[k+3]]
-                        inlist.append(indata)
-                        outlist.append(outdata)
+                if(len(_str)<=NGRAMS or (len(_str)-k) <= NGRAMS):
+                    continue
+                else:
+                    if(dic.get(_str[k]) == None or dic.get(_str[k+1]) == None 
+                            or dic.get(_str[k+2])== None or dic.get(_str[k+3])== None):
+                        continue
+                    else:
+                        if((len(_str)-k)>NGRAMS):
+                            indata = [dic[_str[k]],dic[_str[k+1]],dic[_str[k+2]]]
+                            outdata = [dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]]]
+                            #indata = [_str[k+0],_str[k+1],_str[k+2]]
+                            #outdata = [_str[k+1],_str[k+2],_str[k+3]]
+                            inlist.append(indata)
+                            outlist.append(outdata)
         index = 0
         while(len(inlist)<BATCH_SIZE):
             inlist.append(inlist[index])

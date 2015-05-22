@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 from theano.tensor.nnet import binary_crossentropy, categorical_crossentropy
-from lasagne.layers import get_output
+from .layers import get_output
 
 
 def mse(x, t):
