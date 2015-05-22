@@ -49,7 +49,7 @@ class RecurrentSoftmaxLayer(Layer):
         act = T.tensordot(input, self.W,axes=1)
         act = act.reshape((self.input_shape[0]*self.input_shape[1],self.num_units),ndim=2)
         result = self.nonlinearity(act)
-        result = result.reshape((self.input_shape[0], self.input_shape[1], self.num_units))
+        result = result.reshape((self.input_shape[0], self.input_shape[1], self.num_units),ndim=3)
         return result
 
 class CustomRecurrentLayer(Layer):
@@ -131,7 +131,7 @@ class CustomRecurrentLayer(Layer):
                              go_backwards=self.backwards,
                              outputs_info=[self.hid_init],
                              truncate_gradient=self.trace_steps)[0]
-        # Now, dimshuffle back to (n_batch, n_time_steps, n_features))
+        # Now, dimshuffle back to (n_batch, nGrams, n_features))
         output = output.dimshuffle(1, 0, 2)
 
         if self.backwards:
