@@ -19,4 +19,6 @@ def getsen (s = 'flurried'):
         lsofls.append(ls)
     return lsofls
 batchsize = 100
-ls = getsen('swear')
+ls = getsen('paris')
+for lss in ls:
+    print(len(lss))
