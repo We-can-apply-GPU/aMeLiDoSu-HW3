@@ -16,7 +16,8 @@ from settings import *
 #impotr util
 #import pickle
 #import random
-
+def norm(t):
+    return T.sqrt(T.sqr(t).sum())
 def load_data():
 
     X_train ,Y_train = iodata.iodata()
@@ -73,7 +74,7 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
     XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)
     YY = T.reshape(Y_batch,compare_shape)
-    accuracy = T.dot(XX,YY)
+    accuracy = T.dot(XX,YY)/(norm(XX) * norm(YY))
     #pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
     #errorRate = T.norm(output_layer.get_output(X_batch,deterministic = True) - Y_batch)
 
