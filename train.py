@@ -45,7 +45,7 @@ def build_model(bi_directional = False):
         l_rec_combined = network.layers.ElemwiseSumLayer(
                 incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
 
-        l_out = network.layers.RecurrentSoftmaxLayer(
+        l_out = network.layers.OuptutLayer(
                 l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
     else:
         l_in = network.layers.InputLayer(
@@ -57,7 +57,7 @@ def build_model(bi_directional = False):
         #l_middle = network.layers.DenseLayer(l_recurrent,num_units = NUM_HIDDEN_UNITS,nonlinearity = network.nonlinearities.rectify)
 
         #l_reshape2 = network.layers.ReshapeLayer(l_middle,shape=(BATCH_SIZE,NGRAMS,NUM_HIDDEN_UNITS))
-        l_out = network.layers.RecurrentSoftmaxLayer(
+        l_out = network.layers.OutputLayer(
                 l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
 
     return l_out
