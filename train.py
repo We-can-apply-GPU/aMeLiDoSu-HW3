@@ -65,11 +65,15 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     #print(batch_slice)
 
     objective = network.objectives.Objective(output_layer,
-            loss_function=network.objectives.categorical_crossentropy)
+            loss_function=network.objectives.mse)
 
     loss_train = objective.get_loss(X_batch, target=Y_batch)
     loss_eval = objective.get_loss(X_batch, target=Y_batch, deterministic=True)
-    accuracy = objective.get_loss(X_batch, target=Y_batch, deterministic=True)
+    accuracy =T.mean(T.eq(output_layer.get_output(X_batch,deterministic = True),Y_batch),dtype = theano.config.floatX)
+    #compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
+    #XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)
+    #YY = T.reshape(Y_batch,compare_shape)
+    #accuracy = T.dot(XX,YY)
     #pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
     #errorRate = T.norm(output_layer.get_output(X_batch,deterministic = True) - Y_batch)
 
