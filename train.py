@@ -18,6 +18,8 @@ from settings import *
 #import random
 def norm(t):
     return T.sqrt(T.sqr(t).sum())
+#def cross_entropy(a,b):
+    #return ((-1) * T.log(1 - a)*(1-b) + b*T.log(a))
 def load_data():
 
     X_train ,Y_train = iodata.iodata()
@@ -136,11 +138,10 @@ def main():
                 avg_valid_accu = np.mean(batch_valid_accus)
                 print("--validation loss:\t\t{:.2f}".format(avg_valid_loss))
                 print("--validation accuracy:\t\t{:.2f} %".format(avg_valid_accu))
-
-        #write model
-        #fout = open("model/5d/{:.2f}".format(avg_valid_accu * 100), "w")
-        #pickle.dump(network.layers.get_all_param_values(output_layer), fout)
-        now = time.time()
+                #write model
+                fout = open("model/5d/{:.2f}".format(avg_valid_accu * 100), "w")
+                pickle.dump(network.layers.get_all_param_values(output_layer), fout)
+                now = time.time()
 
     except KeyboardInterrupt:
         pass
