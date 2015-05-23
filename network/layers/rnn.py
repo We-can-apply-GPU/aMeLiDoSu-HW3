@@ -29,7 +29,6 @@ class RecurrentSoftmaxLayer(Layer):
             default is softMax (as its name XD)
         """
 
-        self.enter = 0
         super(RecurrentSoftmaxLayer, self).__init__(incoming,name,**kwargs)
         self.num_units = num_units
         self.num_grams = self.input_shape[1]
@@ -44,7 +43,6 @@ class RecurrentSoftmaxLayer(Layer):
         # BATCHSIZE * (# of grams) * (NUM_UNITS @ this layer)   
 
     def get_output_for(self, input, *args, **kwargs):
-        self.enter += 1
         #What is tensotdot?? @@
         #-->ref : http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
         act = T.tensordot(input, self.W,axes=1)
@@ -172,18 +170,18 @@ class RecurrentLayer(CustomRecurrentLayer):
         super(RecurrentLayer, self).__init__(
             incoming, name,input_to_hid, hid_to_hid, nonlinearity=nonlinearity,
             hid_init=hid_init, backwards=backwards,trace_steps=trace_steps)
-class ReshapeLayer(Layer):
-    '''ReshapeLayers exist because RecurrentLayers expects a shape of
-    (n_batch, n_time_steps, n_features) but the DenseLayer will flatten
-    that shape to (n_batch, n_time_steps*n_features) by default which is wrong.
-    So, you need to manually reshape before and after using a DenseLayer.
-    '''
-    def __init__(self, input_layer, shape):
-        super(ReshapeLayer, self).__init__(input_layer)
-        self.shape = shape
+#class ReshapeLayer(Layer):
+    #'''ReshapeLayers exist because RecurrentLayers expects a shape of
+    #(n_batch, n_time_steps, n_features) but the DenseLayer will flatten
+    #that shape to (n_batch, n_time_steps*n_features) by default which is wrong.
+    #So, you need to manually reshape before and after using a DenseLayer.
+    #'''
+    #def __init__(self, input_layer, shape):
+        #super(ReshapeLayer, self).__init__(input_layer)
+        #self.shape = shape
 
-    def get_output_shape_for(self, input_shape):
-        return self.shape
+    #def get_output_shape_for(self, input_shape):
+        #return self.shape
 
-    def get_output_for(self, input, *args, **kwargs):
-        return input.reshape(self.shape)
+    #def get_output_for(self, input, *args, **kwargs):
+        #return input.reshape(self.shape)

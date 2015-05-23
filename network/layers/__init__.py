@@ -5,3 +5,4 @@ from .dense import *
 from .noise import *
 from .merge import *
 from .rnn import *
+from .shape import *

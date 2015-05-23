@@ -14,7 +14,7 @@ from settings import *
 
 
 #impotr util
-#import pickle
+import pickle
 #import random
 def norm(t):
     return T.sqrt(T.sqr(t).sum())
@@ -35,7 +35,7 @@ def build_model(bi_directional = False):
     if bi_directional:
         l_in = network.layers.InputLayer(
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
-
+        
         l_rec_forward = network.layers.RecurrentLayer(
                 l_in,num_units=NUM_HIDDEN_UNITS,name="ForwardLayer")
 
@@ -52,6 +52,11 @@ def build_model(bi_directional = False):
                 shape=(BATCH_SIZE,NGRAMS,WORD_2_VEC_FEATURES),name="InputLayer")
         l_recurrent = network.layers.RecurrentLayer(
                 l_in, num_units=NUM_HIDDEN_UNITS,name="RecurrentLayer")
+
+        #l_reshape1 = network.layers.ReshapeLayer(l_recurrent,shape=(BATCH_SIZE,NGRAMS*NUM_HIDDEN_UNITS))
+        #l_middle = network.layers.DenseLayer(l_recurrent,num_units = NUM_HIDDEN_UNITS,nonlinearity = network.nonlinearities.rectify)
+
+        #l_reshape2 = network.layers.ReshapeLayer(l_middle,shape=(BATCH_SIZE,NGRAMS,NUM_HIDDEN_UNITS))
         l_out = network.layers.RecurrentSoftmaxLayer(
                 l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
 
@@ -110,7 +115,7 @@ def main():
 
     print("Building model and compile theano...")
     print(data['num_train'])
-    output_layer = build_model(bi_directional = True)
+    output_layer = build_model(bi_directional = False)
 
     print ('Creating iter functions')
     iter_funcs = create_iter_functions(data, output_layer)
