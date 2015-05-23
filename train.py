@@ -69,11 +69,11 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
 
     loss_train = objective.get_loss(X_batch, target=Y_batch)
     loss_eval = objective.get_loss(X_batch, target=Y_batch, deterministic=True)
-    accuracy =T.mean(T.eq(output_layer.get_output(X_batch,deterministic = True),Y_batch),dtype = theano.config.floatX)
-    #compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
-    #XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)
-    #YY = T.reshape(Y_batch,compare_shape)
-    #accuracy = T.dot(XX,YY)
+    #accuracy =T.mean(T.eq(output_layer.get_output(X_batch,deterministic = True),Y_batch),dtype = theano.config.floatX)
+    compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
+    XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)
+    YY = T.reshape(Y_batch,compare_shape)
+    accuracy = T.dot(XX,YY)
     #pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
     #errorRate = T.norm(output_layer.get_output(X_batch,deterministic = True) - Y_batch)
 
@@ -81,7 +81,7 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     updates = network.updates.rmsprop(loss_train, all_params, LEARNING_RATE, MOMENTUM)
 
     iter_train = theano.function(
-            [batch_index], [loss_train,accuracy],
+            [batch_index], loss_train,
             updates=updates,
             givens={
                 X_batch: data['X_train'][batch_slice],
@@ -134,7 +134,7 @@ def main():
                 avg_valid_loss = np.mean(batch_valid_losses)
                 avg_valid_accu = np.mean(batch_valid_accus)
                 print("--validation loss:\t\t{:.2f}".format(avg_valid_loss))
-                print("--validation accuracy:\t\t{:.2f} %".format(avg_valid_accu * 100))
+                print("--validation accuracy:\t\t{:.2f} %".format(avg_valid_accu))
 
         #write model
         #fout = open("model/5d/{:.2f}".format(avg_valid_accu * 100), "w")
