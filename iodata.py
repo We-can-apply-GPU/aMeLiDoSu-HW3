@@ -8,10 +8,9 @@ Description: produce in, out data for train
 import extract
 import sentence
 from settings import *
-
+import numpy  as np
 indatalist = []
 outdatalist = []
-
 def iodata():
     _list = sentence.getsen('swear')
     dic = extract.extract(100, 'train_pro.txt', 'true')
@@ -42,9 +41,12 @@ def iodata():
             inlist.append(inlist[index])
             outlist.append(outlist[index])
             index = index + 1
-        indatalist.append(inlist)
+        #print(len(inlist))
+        indatalist.extend(inlist)
+        outdatalist.extend(outlist)
+        #pp = np.array(indatalist)
+        #print(pp.shape)
         #print(indatalist)
-        outdatalist.append(outlist)
     return indatalist, outdatalist
 
 if __name__=="__main__":

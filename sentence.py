@@ -11,7 +11,7 @@ def getsen (s = 'flurried'):
         if s in j:
             #w.write(i+'\n')
             count+= len(j)-3
-            if count> batchsize:
+            if count> BATCH_SIZE:
                 lsofls.append(ls)
                 ls = []
                 count = len(j)-3
@@ -19,5 +19,4 @@ def getsen (s = 'flurried'):
     if len(ls) != 0:
         lsofls.append(ls)
     return lsofls
-batchsize = BATCH_SIZE
 #ls = getsen('swear')

@@ -9,11 +9,10 @@ from .input import InputLayer
 from .dense import DenseLayer
 import helper
 from settings import *
-
 class RecurrentSoftmaxLayer(Layer):
 
     def __init__(self, incoming, name,num_units,W=init.Uniform(),
-                 b=init.Constant(0.),nonlinearity=nonlinearities.softmax, **kwargs):
+                 b=init.Constant(0.),nonlinearity=nonlinearities.identity, **kwargs):
         """
         An output layer for recurrent specifically.
 
@@ -30,6 +29,7 @@ class RecurrentSoftmaxLayer(Layer):
             default is softMax (as its name XD)
         """
 
+        self.enter = 0
         super(RecurrentSoftmaxLayer, self).__init__(incoming,name,**kwargs)
         self.num_units = num_units
         self.num_grams = self.input_shape[1]
@@ -44,6 +44,7 @@ class RecurrentSoftmaxLayer(Layer):
         # BATCHSIZE * (# of grams) * (NUM_UNITS @ this layer)   
 
     def get_output_for(self, input, *args, **kwargs):
+        self.enter += 1
         #What is tensotdot?? @@
         #-->ref : http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
         act = T.tensordot(input, self.W,axes=1)
@@ -123,11 +124,6 @@ class CustomRecurrentLayer(Layer):
         # but scan requires the iterable dimension to be first
         # So, we need to dimshuffle to (nGrams, n_batch, n_features)
         #print(shape(input))
-        print("~~~~~~~~~~~~~~~~~~~~~~")
-        print(input[0].shape[1])
-        print(input[1].shape[1])
-        print(input[2].shape[1])
-        print("~~~~~~~~~~~~~~~~~~~~~~~")
         input = input.dimshuffle(1, 0, 2)
 
         #Refer to the order od theano.scan ~ seqs -> output_info -> nonseqs
