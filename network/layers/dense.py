@@ -13,32 +13,6 @@ __all__ = [
 
 
 class DenseLayer(Layer):
-    """
-    A fully connected layer.
-
-    Parameters
-    ----------
-    incoming : a :class:`Layer` instance or a tuple
-        The layer feeding into this layer, or the expected input shape
-
-    num_units : int
-        The number of units of the layer
-
-    W : Theano shared variable, numpy array or callable
-        An initializer for the weights of the layer. If a shared variable or a
-        numpy array is provided the shape should  be (num_inputs, num_units).
-        See :meth:`Layer.create_param` for more information.
-
-    b : Theano shared variable, numpy array, callable or None
-        An initializer for the biases of the layer. If a shared variable or a
-        numpy array is provided the shape should be (num_units,).
-        If None is provided the layer will have no biases.
-        See :meth:`Layer.create_param` for more information.
-
-    nonlinearity : callable or None
-        The nonlinearity that is applied to the layer activations. If None
-        is provided, the layer will be linear.
-    """
     def __init__(self, incoming, num_units, W=init.GlorotUniform(),
                  b=init.Constant(0.), nonlinearity=nonlinearities.rectify,
                  **kwargs):

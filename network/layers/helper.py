@@ -5,7 +5,6 @@ import numpy as np
 
 from .. import utils
 
-
 __all__ = [
     "get_all_layers",
     "get_all_layers_old",
@@ -21,40 +20,6 @@ __all__ = [
 
 
 def get_all_layers(layer, treat_as_input=None):
-    """
-    This function gathers all layers below one or more given :class:`Layer`
-    instances, including the given layer(s). Its main use is to collect all
-    layers of a network just given the output layer(s). The layers are
-    guaranteed to be returned in a topological order: a layer in the result
-    list is always preceded by all layers its input depends on.
-
-    Parameters
-    ----------
-    layer : Layer or list
-        the :class:`Layer` instance for which to gather all layers feeding
-        into it, or a list of :class:`Layer` instances.
-
-    treat_as_input : None or iterable
-        an iterable of :class:`Layer` instances to treat as input layers
-        with no layers feeding into them. They will show up in the result
-        list, but their incoming layers will not be collected (unless they
-        are required for other layers as well).
-
-    Returns
-    -------
-    list
-        a list of :class:`Layer` instances feeding into the given
-        instance(s) either directly or indirectly, and the given
-        instance(s) themselves, in topological order.
-    """
-    import warnings
-    warnings.warn("get_all_layers() has been changed to return layers in "
-                  "topological order. The former implementation is still "
-                  "available as get_all_layers_old(), but will be removed "
-                  "before the first release of Lasagne. To ignore this "
-                  "warning, use `warnings.filterwarnings('ignore', "
-                  "'.*topo.*')`.")
-
     # We perform a depth-first search. We add a layer to the result list only
     # after adding all its incoming layers (if any) or when detecting a cycle.
     # We use a LIFO stack to avoid ever running into recursion depth limits.
@@ -99,12 +64,6 @@ def get_all_layers(layer, treat_as_input=None):
 
 
 def get_all_layers_old(layer):
-    """
-    Earlier implementation of `get_all_layers()` that does a breadth-first
-    search. Kept here to ease converting old models that rely on the order of
-    get_all_layers() or get_all_params(). Will be removed before the first
-    release of Lasagne.
-    """
     if isinstance(layer, (list, tuple)):
         layers = list(layer)
     else:
@@ -131,44 +90,6 @@ def get_all_layers_old(layer):
 
 
 def get_output(layer_or_layers, inputs=None, **kwargs):
-    """
-    Computes the output of the network at one or more given layers.
-    Optionally, you can define the input(s) to propagate through the network
-    instead of using the input variable(s) associated with the network's
-    input layer(s).
-
-    Parameters
-    ----------
-    layer_or_layers : Layer or list
-        the :class:`Layer` instance for which to compute the output
-        expressions, or a list of :class:`Layer` instances.
-
-    inputs : None, Theano expression, numpy array, or dict
-        If None, uses the input variables associated with the
-        :class:`InputLayer` instances.
-        If a Theano expression, this defines the input for a single
-        :class:`InputLayer` instance. Will throw a ValueError if there
-        are multiple :class:`InputLayer` instances.
-        If a numpy array, this will be wrapped as a Theano constant
-        and used just like a Theano expression.
-        If a dictionary, any :class:`Layer` instance (including the
-        input layers) can be mapped to a Theano expression or numpy
-        array to use instead of its regular output.
-
-    Returns
-    -------
-    output : Theano expression or list
-        the output of the given layer(s) for the given network input
-
-    Notes
-    -----
-    Depending on your network architecture, `get_output([l1, l2])` may
-    be crucially different from `[get_output(l1), get_output(l2)]`. Only
-    the former ensures that the output expressions depend on the same
-    intermediate expressions. For example, when `l1` and `l2` depend on
-    a common dropout layer, the former will use the same dropout mask for
-    both, while the latter will use two different dropout masks.
-    """
     from .input import InputLayer
     from .base import MergeLayer
     # obtain topological ordering of all layers the output layer(s) depend on
@@ -216,30 +137,6 @@ def get_output(layer_or_layers, inputs=None, **kwargs):
 
 
 def get_output_shape(layer_or_layers, input_shapes=None):
-    """
-    Computes the output shape of the network at one or more given layers.
-
-    Parameters
-    ----------
-    layer_or_layers : Layer or list
-        the :class:`Layer` instance for which to compute the output
-        shapes, or a list of :class:`Layer` instances.
-
-    input_shapes : None, tuple, or dict
-        If None, uses the input shapes associated with the
-        :class:`InputLayer` instances.
-        If a tuple, this defines the input shape for a single
-        :class:`InputLayer` instance. Will throw a ValueError if there
-        are multiple :class:`InputLayer` instances.
-        If a dictionary, any :class:`Layer` instance (including the
-        input layers) can be mapped to a shape tuple to use instead of
-        its regular output shape.
-
-    Returns
-    -------
-    tuple or list
-        the output shape of the given layer(s) for the given network input
-    """
     # shortcut: return precomputed shapes if we do not need to propagate any
     if input_shapes is None or input_shapes == {}:
         try:
@@ -296,106 +193,20 @@ def get_output_shape(layer_or_layers, input_shapes=None):
 
 
 def get_all_params(layer, **tags):
-    """
-    This function gathers all parameters of all layers below one or
-    more given :class:`Layer` instances, including the layer(s) itself. Its
-    main use is to collect all parameters of a network just given the output
-    layer(s).
-
-    By default, all parameters that participate in the forward pass will be
-    returned. The list can optionally be filtered by specifying tags as keyword
-    arguments. For example, ``trainable=True`` will only return trainable
-    parameters, and ``regularizable=True`` will only return parameters that can
-    be regularized (e.g., by L2 decay).
-
-    Parameters
-    ----------
-    layer : Layer or list
-        The :class:`Layer` instance for which to gather all parameters, or a
-        list of :class:`Layer` instances.
-
-    **tags (optional)
-        tags can be specified to filter the list. Specifying ``tag1=True``
-        will limit the list to parameters that are tagged with ``tag1``.
-        Specifying ``tag1=False`` will limit the list to parameters that
-        are not tagged with ``tag1``. Commonly used tags are
-        ``regularizable`` and ``trainable``.
-
-    Returns
-    -------
-    params : list
-        A list of Theano shared variables representing the parameters.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer, DenseLayer
-    >>> l_in = InputLayer((100, 20))
-    >>> l1 = DenseLayer(l_in, num_units=50)
-    >>> all_params = get_all_params(l1)
-    >>> all_params == [l1.W, l1.b]
-    True
-    """
     layers = get_all_layers(layer)
     params = sum([l.get_params(**tags) for l in layers], [])
     return utils.unique(params)
 
 
 def get_all_bias_params(layer):
-    import warnings
-    warnings.warn("get_all_bias_params(layer) is deprecated and will be "
-                  "removed for the first release of Lasagne. Please use "
-                  "get_all_params(layer, regularizable=False) instead.")
     return get_all_params(layer, regularizable=False)
 
 
 def get_all_non_bias_params(layer):
-    import warnings
-    warnings.warn("get_all_non_bias_params(layer) is deprecated and will be "
-                  "removed for the first release of Lasagne. Please use "
-                  "get_all_params(layer, regularizable=True) instead.")
     return get_all_params(layer, regularizable=True)
 
 
 def count_params(layer, **tags):
-    """
-    This function counts all parameters (i.e. the number of scalar
-    values) of all layers below one or more given :class:`Layer` instances,
-    including the layer(s) itself.
-
-    This is useful to compare the capacity of various network architectures.
-    All parameters returned by the :class:`Layer`s' `get_params` methods are
-    counted.
-
-    Parameters
-    ----------
-    layer : Layer or list
-        The :class:`Layer` instance for which to count the parameters, or a
-        list of :class:`Layer` instances.
-
-    **tags (optional)
-        tags can be specified to filter the list of parameter variables that
-        will be included in the count. Specifying ``tag1=True``
-        will limit the list to parameters that are tagged with ``tag1``.
-        Specifying ``tag1=False`` will limit the list to parameters that
-        are not tagged with ``tag1``. Commonly used tags are
-        ``regularizable`` and ``trainable``.
-
-    Returns
-    -------
-    int
-        The total number of learnable parameters.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer, DenseLayer
-    >>> l_in = InputLayer((100, 20))
-    >>> l1 = DenseLayer(l_in, num_units=50)
-    >>> param_count = count_params(l1)
-    >>> param_count
-    1050
-    >>> param_count == 20 * 50 + 50  # 20 input * 50 units + 50 biases
-    True
-    """
     params = get_all_params(layer, **tags)
     shapes = [p.get_value().shape for p in params]
     counts = [np.prod(shape) for shape in shapes]
@@ -403,89 +214,11 @@ def count_params(layer, **tags):
 
 
 def get_all_param_values(layer, **tags):
-    """
-    This function returns the values of the parameters of all layers below one
-    or more given :class:`Layer` instances, including the layer(s) itself.
-
-    This function can be used in conjunction with set_all_param_values to save
-    and restore model parameters.
-
-    Parameters
-    ----------
-    layer : Layer or list
-        The :class:`Layer` instance for which to gather all parameter values,
-        or a list of :class:`Layer` instances.
-
-    **tags (optional)
-        tags can be specified to filter the list. Specifying ``tag1=True``
-        will limit the list to parameters that are tagged with ``tag1``.
-        Specifying ``tag1=False`` will limit the list to parameters that
-        are not tagged with ``tag1``. Commonly used tags are
-        ``regularizable`` and ``trainable``.
-
-    Returns
-    -------
-    list of numpy.array
-        A list of numpy arrays representing the parameter values.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer, DenseLayer
-    >>> l_in = InputLayer((100, 20))
-    >>> l1 = DenseLayer(l_in, num_units=50)
-    >>> all_param_values = get_all_param_values(l1)
-    >>> (all_param_values[0] == l1.W.get_value()).all()
-    True
-    >>> (all_param_values[1] == l1.b.get_value()).all()
-    True
-    """
     params = get_all_params(layer, **tags)
     return [p.get_value() for p in params]
 
 
 def set_all_param_values(layer, values, **tags):
-    """
-    Given a list of numpy arrays, this function sets the parameters of all
-    layers below one or more given :class:`Layer` instances (including the
-    layer(s) itself) to the given values.
-
-    This function can be used in conjunction with get_all_param_values to save
-    and restore model parameters.
-
-    Parameters
-    ----------
-    layer : Layer or list
-        The :class:`Layer` instance for which to set all parameter values, or a
-        list of :class:`Layer` instances.
-
-    values : list of numpy.array
-        A list of numpy arrays representing the parameter values, must match
-        the number of parameters.
-
-    **tags (optional)
-        tags can be specified to filter the list of parameters to be set.
-        Specifying ``tag1=True`` will limit the list to parameters that are
-        tagged with ``tag1``.
-        Specifying ``tag1=False`` will limit the list to parameters that
-        are not tagged with ``tag1``. Commonly used tags are
-        ``regularizable`` and ``trainable``.
-
-    Raises
-    ------
-    ValueError
-        If the number of values is not equal to the number of params.
-
-    Examples
-    --------
-    >>> from lasagne.layers import InputLayer, DenseLayer
-    >>> l_in = InputLayer((100, 20))
-    >>> l1 = DenseLayer(l_in, num_units=50)
-    >>> all_param_values = get_all_param_values(l1)
-    >>> # all_param_values is now [l1.W.get_value(), l1.b.get_value()]
-    >>> # ...
-    >>> set_all_param_values(l1, all_param_values)
-    >>> # the parameter values are restored.
-    """
     params = get_all_params(layer, **tags)
     if len(params) != len(values):
         raise ValueError("mismatch: got %d values to set %d parameters" %

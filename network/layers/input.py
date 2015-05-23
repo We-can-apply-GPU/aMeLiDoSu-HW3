@@ -14,34 +14,6 @@ __all__ = [
 
 
 class InputLayer(Layer):
-    """
-    This layer holds a symbolic variable that represents a network input. A
-    variable can be specified when the layer is instantiated, else it is
-    created.
-
-    Parameters
-    ----------
-    shape : tuple of `int` or `None` elements
-        The shape of the input. Any element can be `None` to indicate that the
-        size of that dimension is not fixed at compile time.
-
-    input_var : Theano symbolic variable or `None` (default: `None`)
-        A variable representing a network input. If it is not provided, a
-        variable will be created.
-
-    Raises
-    ------
-    ValueError
-        If the dimension of `input_var` is not equal to `len(shape)`
-
-    Notes
-    -----
-    The first dimension usually indicates the batch size. If you specify it,
-    Theano may apply more optimizations while compiling the training or
-    prediction function, but the compiled function will not accept data of a
-    different batch size at runtime. To compile for a variable batch size, set
-    the first shape element to `None` instead.
-    """
     def __init__(self, shape, input_var=None, name=None, **kwargs):
         self.shape = shape
         ndim = len(shape)
