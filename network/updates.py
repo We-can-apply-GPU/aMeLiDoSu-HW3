@@ -11,8 +11,6 @@ __all__ = [
     "sgd",
     "apply_momentum",
     "momentum",
-    "apply_nesterov_momentum",
-    "nesterov_momentum",
     "adagrad",
     "rmsprop",
     "adadelta",
@@ -60,28 +58,6 @@ def apply_momentum(updates, params=None, momentum=0.9):
 def momentum(loss_or_grads, params, learning_rate, momentum=0.9):
     updates = sgd(loss_or_grads, params, learning_rate)
     return apply_momentum(updates, momentum=momentum)
-
-
-def apply_nesterov_momentum(updates, params=None, momentum=0.9):
-    if params is None:
-        params = updates.keys()
-    updates = OrderedDict(updates)
-
-    for param in params:
-        value = param.get_value(borrow=True)
-        velocity = theano.shared(np.zeros(value.shape, dtype=value.dtype),
-                                 broadcastable=param.broadcastable)
-        x = momentum * velocity + updates[param] - param
-        updates[velocity] = x
-        updates[param] = momentum * x + updates[param]
-
-    return updates
-
-
-def nesterov_momentum(loss_or_grads, params, learning_rate, momentum=0.9):
-    updates = sgd(loss_or_grads, params, learning_rate)
-    return apply_nesterov_momentum(updates, momentum=momentum)
-
 
 def adagrad(loss_or_grads, params, learning_rate=1.0, epsilon=1e-6):
 
