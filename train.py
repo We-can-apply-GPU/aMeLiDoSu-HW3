@@ -79,8 +79,8 @@ def create_iter_functions(data, output_layer, batch_size=BATCH_SIZE,
     loss_eval = objective.get_loss(X_batch, target=Y_batch, deterministic=True)
     #accuracy =T.mean(T.eq(output_layer.get_output(X_batch,deterministic = True),Y_batch),dtype = theano.config.floatX)
     compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
-    XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)
-    YY = T.reshape(Y_batch,compare_shape)
+    XX = T.reshape(output_layer.get_output(X_batch,deterministic = True),compare_shape)[WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
+    YY = T.reshape(Y_batch,compare_shape)[WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
     accuracy = T.dot(XX,YY)/(norm(XX) * norm(YY))
     #pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
     #errorRate = T.norm(output_layer.get_output(X_batch,deterministic = True) - Y_batch)
