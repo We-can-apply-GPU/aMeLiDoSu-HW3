@@ -24,14 +24,15 @@ def iodata():
                     continue
                 else:
                     if(dic.get(_str[k]) == None or dic.get(_str[k+1]) == None 
-                            or dic.get(_str[k+2])== None or dic.get(_str[k+3])== None):
+                            or dic.get(_str[k+2])== None or dic.get(_str[k+3])== None 
+                            or dic.get(_str[k+4]) == None):
                         continue
                     else:
                         if((len(_str)-k)>NGRAMS):
-                            indata = [dic[_str[k]],dic[_str[k+1]],dic[_str[k+2]]]
-                            outdata = [dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]]]
-                            #indata = [_str[k+0],_str[k+1],_str[k+2]]
-                            #outdata = [_str[k+1],_str[k+2],_str[k+3]]
+                            indata = [dic[_str[k]],dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]]]
+                            outdata = [dic[_str[k+1]],dic[_str[k+2]],dic[_str[k+3]],dic[_str[k+4]]]
+                            #indata = [_str[k+0],_str[k+1],_str[k+2],_str[k+4]]
+                            #outdata = [_str[k+1],_str[k+2],_str[k+3],_str[k+4]]
                             #print("{}    : {}".format(indata,k))
                             #print(outdata)
                             inlist.append(indata)
