@@ -1,11 +1,6 @@
-"""
-Functions to create initializers for parameter variables.
-"""
-
 import numpy as np
 
 from .utils import floatX
-
 
 class Initializer(object):
     def __call__(self, shape):
@@ -55,6 +50,8 @@ class Constant(Initializer):
         return floatX(np.ones(shape) * self.val)
 
 class Glorot(Initializer):
+    #ref
+
     def __init__(self, initializer, gain=1.0, c01b=False):
         if gain == 'relu':
             gain = np.sqrt(2)
