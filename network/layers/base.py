@@ -1,13 +1,9 @@
 from collections import OrderedDict
-
 from .. import utils
-
-
 __all__ = [
     "Layer",
     "MergeLayer",
 ]
-
 
 # Layer base class
 
@@ -32,13 +28,11 @@ class Layer(object):
 
         only = set(tag for tag, value in tags.items() if value)
         if only:
-            # retain all parameters that have all of the tags in `only`
             result = [param for param in result
                       if not (only - self.params[param])]
 
         exclude = set(tag for tag, value in tags.items() if not value)
         if exclude:
-            # retain all parameters that have none of the tags in `exclude`
             result = [param for param in result
                       if not (self.params[param] & exclude)]
 
@@ -53,9 +47,6 @@ class Layer(object):
 
     def get_output_shape_for(self, input_shape):
         return input_shape
-
-    def get_output_for(self, input, **kwargs):
-        raise NotImplementedError
 
     def add_param(self, spec, shape, name=None, **tags):
         # prefix the param name with the layer name if it exists
@@ -74,24 +65,15 @@ class Layer(object):
     def get_bias_params(self):
         return self.get_params(regularizable=False)
 
-
 class MergeLayer(Layer):
     def __init__(self, incomings, name=None):
         self.input_shapes = [incoming if isinstance(incoming, tuple)
-                             else incoming.output_shape
-                             for incoming in incomings]
+                             else incoming.output_shape for incoming in incomings]
         self.input_layers = [None if isinstance(incoming, tuple)
-                             else incoming
-                             for incoming in incomings]
+                             else incoming for incoming in incomings]
         self.name = name
         self.params = OrderedDict()
 
     @Layer.output_shape.getter
     def output_shape(self):
         return self.get_output_shape_for(self.input_shapes)
-
-    def get_output_shape_for(self, input_shapes):
-        raise NotImplementedError
-
-    def get_output_for(self, inputs, **kwargs):
-        raise NotImplementedError
