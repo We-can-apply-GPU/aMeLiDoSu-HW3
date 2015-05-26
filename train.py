@@ -45,7 +45,7 @@ def build_model(bi_directional = False):
         l_rec_combined = network.layers.ElemwiseSumLayer(
                 incomings = (l_rec_forward, l_rec_backward),name="SummingLayer")
 
-        l_out = network.layers.OuptutLayer(
+        l_out = network.layers.OutputLayer(
                 l_rec_combined,num_units=WORD_2_VEC_FEATURES,name="OutputLayer")
     else:
         l_in = network.layers.InputLayer(
@@ -115,7 +115,7 @@ def main():
 
     print("Building model and compile theano...")
     print(data['num_train'])
-    output_layer = build_model(bi_directional = False)
+    output_layer = build_model(bi_directional = True)
 
     print ('Creating iter functions')
     iter_funcs = create_iter_functions(data, output_layer)
