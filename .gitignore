@@ -1,4 +1,6 @@
 Holmes_Training_Data/
+data/
+model/
 testing_data.txt
 *.pyc
 *~

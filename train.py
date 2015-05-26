@@ -146,7 +146,7 @@ def main():
                 print("--validation loss:\t\t{:.2f}".format(avg_valid_loss))
                 print("--validation accuracy:\t\t{:.2f} %".format(avg_valid_accu))
                 #write model
-                fout = open("model/5d/{:.2f}".format(avg_valid_accu * 100), "w")
+                fout = open("model/{:.2f}".format(avg_valid_accu * 100), "w")
                 pickle.dump(network.layers.get_all_param_values(output_layer), fout)
                 now = time.time()
 
