@@ -17,12 +17,7 @@ def as_theano_expression(input):
     if isinstance(input, theano.gof.Variable):
         return input
     else:
-        try:
-            return theano.tensor.constant(input)
-        except Exception as e:
-            raise TypeError("Input of type %s is not a Theano expression and "
-                            "cannot be wrapped as a Theano constant (original "
-                            "exception: %s)" % (type(input), e))
+        return theano.tensor.constant(input)
 
 def unique(l):
     new_list = []
@@ -34,15 +29,9 @@ def unique(l):
 
 def create_param(spec, shape, name=None):
     if isinstance(spec, theano.compile.SharedVariable):
-        if spec.ndim != len(shape):
-            raise RuntimeError("shared variable has %d dimensions, "
-                               "should be %d" % (spec.ndim, len(shape)))
         return spec
 
     elif isinstance(spec, np.ndarray):
-        if spec.shape != shape:
-            raise RuntimeError("parameter array has shape %s, should be "
-                               "%s" % (spec.shape, shape))
         return theano.shared(spec, name=name)
 
     elif hasattr(spec, '__call__'):

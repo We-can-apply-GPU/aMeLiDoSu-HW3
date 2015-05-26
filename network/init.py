@@ -4,14 +4,8 @@ from .utils import floatX
 
 class Initializer(object):
     def __call__(self, shape):
-        """
-        Makes :class:`Initializer` instances callable like a function, invoking
-        their :meth:`sample()` method.
-        """
         return self.sample(shape)
 
-    def sample(self, shape):
-        raise NotImplementedError()
 
 
 class Normal(Initializer):
