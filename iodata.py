@@ -6,7 +6,7 @@ Description: produce in, out data for train
 """
 
 import extract
-import sentence
+import sentence2
 from settings import *
 import numpy  as np
 indatalist = []
@@ -24,12 +24,9 @@ outlist3 = []
 outlist4 = []
 outlist5 = []
 dic = extract.extract(100, 'train_pro.txt', 'true')
-d = open('data/predic_data')
-l = d.readlines();
-z = np.zeros(100)
 
 def iodata():
-    _list = sentence.getsen('swear')
+    _list = sentence2.getsen('data/alltest')
     for i in range(0, len(_list)):
         inlist = []
         outlist = []
@@ -82,6 +79,9 @@ def iodata():
     #outdatalist.extend(outlist)
 
 def for_pre():
+    d = open('data/predic_data')
+    l = d.readlines();
+    z = np.zeros(100)
     for i in range (0, 1040):
         _str = l[i*6].split()
         for j in range (0,5):
