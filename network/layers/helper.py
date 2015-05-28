@@ -5,20 +5,6 @@ import numpy as np
 
 from .. import utils
 
-__all__ = [
-    "get_all_layers",
-    "get_all_layers_old",
-    "get_output",
-    "get_output_shape",
-    "get_all_params",
-    "count_params",
-    "get_all_param_values",
-    "set_all_param_values",
-    "get_all_bias_params",
-    "get_all_non_bias_params",
-]
-
-
 def get_all_layers(layer, treat_as_input=None):
     # We perform a depth-first search. We add a layer to the result list only
     # after adding all its incoming layers (if any) or when detecting a cycle.
