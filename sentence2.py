@@ -18,4 +18,3 @@ def getsen (s,size=5):
     return lsofls
 batchsize = 100
 j = getsen('alltest')
-print(len(j))
