@@ -17,4 +17,4 @@ def getsen (s,size=5):
         lsofls.append(ls)
     return lsofls
 batchsize = 100
-j = getsen('alltest')
+#j = getsen('alltest')
