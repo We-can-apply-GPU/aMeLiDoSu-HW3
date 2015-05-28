@@ -2,6 +2,6 @@ from .base import *
 from .helper import *
 from .input import *
 from .dense import *
-from .merge import *
+from .summing import *
 from .rnn import *
 from .output import *

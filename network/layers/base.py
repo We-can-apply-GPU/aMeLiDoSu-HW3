@@ -2,15 +2,6 @@ from collections import OrderedDict
 
 from .. import utils
 
-
-__all__ = [
-    "Layer",
-    "MergeLayer",
-]
-
-
-# Layer base class
-
 class Layer(object):
     def __init__(self, incoming, name=None):
         if isinstance(incoming, tuple):

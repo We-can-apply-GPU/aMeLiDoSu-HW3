@@ -6,12 +6,6 @@ from .. import nonlinearities
 
 from .base import Layer
 
-
-__all__ = [
-    "DenseLayer",
-]
-
-
 class DenseLayer(Layer):
     def __init__(self, incoming, num_units, W=init.GlorotUniform(),
                  b=init.Constant(0.), nonlinearity=nonlinearities.rectify,
