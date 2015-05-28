@@ -11,6 +11,8 @@ from settings import *
 import numpy  as np
 indatalist = []
 outdatalist = []
+inlist = []
+outlist = []
 def iodata():
     _list = sentence.getsen('swear')
     dic = extract.extract(100, 'train_pro.txt', 'true')
@@ -49,6 +51,21 @@ def iodata():
         #print(pp.shape)
         #print(indatalist)
     return indatalist, outdatalist
+def for_pre(_str):
+    dic = extract.extract(100, 'train_pro.txt', 'true')
+    for i in range(0, len(_str)):
+        if(len(_str)>=NGRAMS and (len(_str)-i) >= NGRAMS):
+            if(dic.get(_str[i]) == None or dic.get(_str[i+1]) == None
+               or dic.get(_str[i+2])== None):
+                continue
+            else:
+                if((len(_str)-i)>=NGRAMS):
+                    indata = [dic[_str[i]],dic[_str[i+1]],dic[_str[i+2]]]
+                    inlist.append(indata)
+                    #outlist.append(outdata)
+    return inlist
+    #outdatalist.extend(outlist)
+
 
 if __name__=="__main__":
     iodata()

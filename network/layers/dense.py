@@ -1,9 +1,7 @@
 import numpy as np
 import theano.tensor as T
-
 from .. import init
 from .. import nonlinearities
-
 from .base import Layer
 
 class DenseLayer(Layer):
@@ -29,10 +27,6 @@ class DenseLayer(Layer):
         return (input_shape[0], self.num_units)
 
     def get_output_for(self, input, **kwargs):
-        if input.ndim > 2:
-            # if the input has more than two dimensions, flatten it into a
-            # batch of feature vectors.
-            input = input.flatten(2)
 
         activation = T.dot(input, self.W)
         if self.b is not None:

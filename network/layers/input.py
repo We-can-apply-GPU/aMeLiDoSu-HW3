@@ -12,7 +12,6 @@ __all__ = [
     "InputLayer",
 ]
 
-
 class InputLayer(Layer):
     def __init__(self, shape, input_var=None, name=None, **kwargs):
         self.shape = shape
