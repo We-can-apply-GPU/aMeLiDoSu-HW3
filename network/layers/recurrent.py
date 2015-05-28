@@ -63,7 +63,6 @@ class RecurrentLayer(Layer):
                                 go_backwards=self.backwards,
                                 outputs_info=[self.h_init],
                                 truncate_gradient=self.trace_steps)
-        # Now, dimshuffle back to (n_batch, nGrams, n_features))
 
         if self.backwards:
             output = output[::-1]  # reverse the gram to noraml index~~
