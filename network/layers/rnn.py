@@ -42,7 +42,7 @@ class RecurrentLayer(Layer):
         #ref:http://deeplearning.net/software/theano/library/scan.html
         def step(layer_input, prev_hidden_state):
             return self.nonlinearity(
-                T.dot(self.W_i2h, layer_input) + T.dot(self.W_h2h, prev_hidden_state))
+                T.dot(layer_input, self.W_i2h) + T.dot(prev_hidden_state, self.W_h2h))
 
         #No non-changing variable -> thus,no non_sequence
         #outputs_info is used for initialization
@@ -66,6 +66,6 @@ class RecurrentLayer(Layer):
         # Now, dimshuffle back to (n_batch, nGrams, n_features))
 
         if self.backwards:
-            output = output[::-1, :]  # reverse the gram to noraml index~~
+            output = output[::-1]  # reverse the gram to noraml index~~
 
         return output

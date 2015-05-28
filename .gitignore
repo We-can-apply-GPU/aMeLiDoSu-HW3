@@ -3,4 +3,5 @@ data/
 model/
 testing_data.txt
 *.pyc
+*.swp
 *~
