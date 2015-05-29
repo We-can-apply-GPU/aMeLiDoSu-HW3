@@ -26,13 +26,16 @@ def cos_dis(x,y):
 def calculate_cos_dis(ix,iy):
     cos_dis_ls = T.zeros([NUM_CHOICES])
     x = T.reshape(ix,(NUM_CHOICES,NGRAMS*WORD_2_VEC_FEATURES))
-    y = T.reshape(iy,(NUM_CHOICES,NGRAMS*WORD_2_VEC_FEATURES))
+    y = T.reshape(iy,(NUM_CHOICES,WORD_2_VEC_FEATURES))
     
     for index in range(NUM_CHOICES):
         vx = x[index][WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
-        vy = y[index][WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
+        vy = y[index]
         cos_dis_ls = T.set_subtensor(cos_dis_ls[index],cos_dis(vx,vy))
-    return T.reshape(cos_dis_ls,(1,NUM_CHOICES))
+    cos_dis_ls = cos_dis_ls.dimshuffle('x',0)
+    #print("YAYAYAY")
+    return cos_dis_ls
+    #return T.reshape(cos_dis_ls,(1,NUM_CHOICES))
 
 def build_model(bi_directional = False):
 
@@ -63,11 +66,13 @@ def build_model(bi_directional = False):
     return l_out
 
 def main():
-    pars = "model/4GRAM_BI/84.85"
+    pars = "model/4GRAM_BI/76.69"
     print("Loading data...")
     (feats_in,feats_out) = iodata.iodata_forPre()
     feats_in = np.array(feats_in).astype(theano.config.floatX)
-    feats_out = np.array(feats_out).astype(theano.config.floatX)
+    print("{}".format((QUESTION_SIZE*(NGRAMS+1)*NUM_CHOICES,1,WORD_2_VEC_FEATURES)))
+    feats_out = np.array(feats_out).astype(theano.config.floatX).reshape((QUESTION_SIZE*(NGRAMS+1)*NUM_CHOICES,1,WORD_2_VEC_FEATURES))
+    #print(feats_out.shape)
     #print(feats_in)
     #print(lenfeats_out)
     output_layer = build_model(bi_directional = True)
@@ -75,16 +80,17 @@ def main():
     x = T.tensor3('x', dtype=theano.config.floatX)
     y  =T.tensor3('y',dtype = theano.config.floatX)  
     cos_distance_ls = np.zeros((QUESTION_SIZE,NUM_CHOICES))
-    print(cos_distance_ls.shape)
     predict = theano.function([x,y],calculate_cos_dis(output_layer.get_output(x,deterministic=True),y),on_unused_input='ignore')
 
     for index in range(QUESTION_SIZE):
         try:
-            pred  = predict(feats_in[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES-1],feats_out[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES-1])
+            print(feats_in[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES].shape)
+            print(feats_out[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES].shape)
+            pred  = predict(feats_in[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES],feats_out[(index)*NUM_CHOICES:(index+1)*NUM_CHOICES])
+            print("OHOHOH")
         except RuntimeError:
             pass
-        cos_distance_ls = cos_distance_ls + pred
+        cos_distance_ls[index,:] = cos_distance_ls[index,:] + pred
 
 if __name__ == '__main__':
     main()
-

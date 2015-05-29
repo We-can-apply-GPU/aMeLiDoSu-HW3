@@ -51,7 +51,9 @@ def iodata():
                             inlist.append(indata)
                             outlist.append(outdata)
         index = 0
-        while(len(inlist)<BATCH_SIZE):
+        print(len(inlist))
+        while(len(inlist)<BATCH_SIZE) and (len(inlist) >0):
+            print(index)
             inlist.append(inlist[index])
             outlist.append(outlist[index])
             index = index + 1
@@ -134,4 +136,8 @@ def iodata_forPre():
     return indatalist, outdatalist
 
 if __name__=="__main__":
-    for_pre()
+    x,y = iodata_forPre()
+    x = np.array(x)
+    y = np.array(y)
+    print(x.shape)
+    print(y.shape)
