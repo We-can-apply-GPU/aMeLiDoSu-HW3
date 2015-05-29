@@ -4,22 +4,19 @@ import theano
 import theano.tensor as T
 from . import utils
 
-__all__ = [
-    "rmsprop",
-]
-
 def get_or_compute_grads(loss_or_grads, params):
     if isinstance(loss_or_grads, list):
         return loss_or_grads
     else:
         return theano.grad(loss_or_grads, params)
 
-def rmsprop(loss_or_grads, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
-    #ref :
+def rnn_update(loss_or_grads, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
     grads = get_or_compute_grads(loss_or_grads, params)
     updates = OrderedDict()
 
     for param, grad in zip(params, grads):
+        tmp = T.sqrt((grad**2).mean())
+        grad = T.switch(T.lt(tmp, theano.shared(0.00001)), grad, grad/tmp*0.00001)
         value = param.get_value(borrow=True)
         accu = theano.shared(np.zeros(value.shape, dtype=value.dtype),
                              broadcastable=param.broadcastable)

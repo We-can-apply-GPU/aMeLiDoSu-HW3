@@ -6,7 +6,7 @@ fout = open("blank.txt", "w")
 for i in range(201, 1041):
     print("{},b".format(i), file=fout)
 """
-f = open("testing_data.txt", "r")
+f = open("data/testing_data.txt", "r")
 fout = open("ans.txt", "w")
 index = 0
 options = [0] * 5

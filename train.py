@@ -17,9 +17,6 @@ from settings import *
 def norm(t):
     return T.sqrt(T.sqr(t).sum())
 
-#def cross_entropy(a,b):
-    #return ((-1) * T.log(1 - a)*(1-b) + b*T.log(a))
-
 def load_data():
     fin = open("data/allsen", "r")
     data = []
@@ -50,50 +47,23 @@ def build_model(bi_directional = False):
             incomings = (l_rec_forward, l_rec_backward), f = 0.8, name="SummingLayer")
 
         l_out = network.layers.DenseLayer(
-            incoming = l_sum, num_units = WORD_2_VEC_FEATURES, name="OutputProjection")
-
-        """
-        l_out = network.layers.OutputLayer(
-            l_rec_combined, num_units=WORD_2_VEC_FEATURES, name="OutputLayer")
-        """
-    else:
-        l_in = network.layers.InputLayer(
-                shape=(None, WORD_2_VEC_FEATURES),name="InputLayer")
-
-        l_out = network.layers.RecurrentLayer(
-                l_in, num_units=NUM_HIDDEN_UNITS,name="RecurrentLayer")
-
-        """
-        l_out = network.layers.OutputLayer(
-                l_recurrent, num_units=WORD_2_VEC_FEATURES,name="OuptutLayer")
-        """
+            incoming = l_sum, num_units = WORD_2_VEC_FEATURES, nonlinearity=None, name="OutputProjection")
 
     return l_out
 
-def create_iter_functions(output_layer, learning_rate=LEARNING_RATE,momentum=MOMENTUM):
+def create_iter_functions(output_layer, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
     seq = T.matrix('seq')
+    normal = seq*100
     objective = network.objectives.Objective(output_layer, loss_function=network.objectives.mse)
 
-    loss = objective.get_loss(seq, target=seq)
-    #accuracy =T.mean(T.eq(output_layer.get_output(X_batch,deterministic = True),Y_batch),dtype = theano.config.floatX)
-    #compare_shape = (BATCH_SIZE*NGRAMS*WORD_2_VEC_FEATURES,)
-
-
-    XX = T.flatten(output_layer.get_output(seq))
-    YY = T.flatten(seq)
-    accuracy = T.dot(XX,YY)/(norm(XX) * norm(YY))
-
-    #XXX = XX[WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
-    #YYY = YY[WORD_2_VEC_FEATURES*(NGRAMS-1)+1:]
-    #pred = T.argmax(output_layer.get_output(X_batch, deterministic=True), axis=1)
-    #errorRate = T.norm(output_layer.get_output(X_batch,deterministic = True) - Y_batch)
+    loss, real_loss, accu = objective.get_loss(normal, target=normal, training=True)
 
     all_params = network.layers.get_all_params(output_layer)
-    updates = network.updates.rmsprop(loss, all_params, LEARNING_RATE, MOMENTUM)
+    updates = network.updates.rnn_update(loss, all_params, LEARNING_RATE, MOMENTUM)
 
-    iter_train = theano.function(inputs=[seq], outputs=loss, updates=updates)
-    iter_valid = theano.function(inputs=[seq], outputs=[loss, accuracy])
+    iter_train = theano.function(inputs=[seq], outputs=[real_loss, accu], updates=updates)
+    iter_valid = theano.function(inputs=[seq], outputs=[real_loss, accu])
 
     return {'train': iter_train, 'valid': iter_valid}
 
@@ -104,31 +74,39 @@ def main():
 
     print("Building model")
     output_layer = build_model(bi_directional = True)
+    if sys.argv > 1:
+        network.layers.set_all_param_values(output_layer, pickle.load(open("model/"+sys.argv[1])))
 
     print ('Creating iter functions')
     iter_funcs = create_iter_functions(output_layer)
 
     print("Training")
+    valid_set = [random.randrange(0, len(data)) for cnt in range(100)]
     try:
         for epoch in range(NUM_EPOCHS):
             now = time.time()
             batch_train_losses = []
+            batch_train_accus = []
             for cnt in range(100):
+                #seq = data[valid_set[cnt]]
                 seq = data[random.randrange(0, len(data))]
                 tmp = []
                 for word in seq:
                     if word in w2v.vocab:
                         tmp.append(w2v[word])
-                batch_train_loss = iter_funcs['train'](np.array(tmp, dtype="float32"))
+                batch_train_loss, batch_train_accu = iter_funcs['train'](np.array(tmp, dtype="float32"))
                 batch_train_losses.append(batch_train_loss)
+                batch_train_accus.append(batch_train_accu)
             avg_train_loss = np.mean(batch_train_losses)
-            print("Epoch {} of {} took {:.3f}s".format(epoch+1, NUM_EPOCHS, time.time() - now))
+            avg_train_accu = np.mean(batch_train_accus)
+            print("Sequence {} of {} took {:.3f}s".format(epoch+1, NUM_EPOCHS, time.time() - now))
             print("  training loss:\t\t{:.6f}".format(avg_train_loss))
+            print("  cosine distance:\t\t{:.4f}".format(avg_train_accu))
             if epoch % 10 == 0:
                 batch_valid_accus = []
                 batch_valid_losses = []
                 for cnt in range(100):
-                    seq = data[cnt]
+                    seq = data[valid_set[cnt]]
                     tmp = []
                     for word in seq:
                         if word in w2v.vocab:
@@ -139,9 +117,9 @@ def main():
                 avg_valid_loss = np.mean(batch_valid_losses)
                 avg_valid_accu = np.mean(batch_valid_accus)
                 print("--validation loss:\t\t{:.6f}".format(avg_valid_loss))
-                print("--validation accuracy:\t\t{:.4f} %".format(avg_valid_accu))
+                print("--cosine distance:\t\t{:.4f}".format(avg_valid_accu))
                 #write model
-                fout = open("model/{:.2f}".format(avg_valid_accu * 100), "w")
+                fout = open("model/{:.2f}".format(avg_valid_loss), "w")
                 pickle.dump(network.layers.get_all_param_values(output_layer), fout)
                 now = time.time()
     except KeyboardInterrupt:

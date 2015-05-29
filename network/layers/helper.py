@@ -127,7 +127,6 @@ def get_all_params(layer, **tags):
     params = sum([l.get_params(**tags) for l in layers], [])
     return utils.unique(params)
 
-
 def get_all_param_values(layer, **tags):
     params = get_all_params(layer, **tags)
     return [p.get_value() for p in params]

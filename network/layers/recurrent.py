@@ -61,9 +61,10 @@ class RecurrentLayer(Layer):
         #Refer to the order od theano.scan ~ seqs -> output_info -> nonseqs
         output, _ = theano.scan(fn=step, sequences=input,
                                 go_backwards=self.backwards,
-                                outputs_info=[self.h_init],
+                                outputs_info=self.h_init,
                                 truncate_gradient=self.trace_steps)
 
+        output = output.flatten(2)
         if self.backwards:
             output = output[::-1]  # reverse the gram to noraml index~~
 

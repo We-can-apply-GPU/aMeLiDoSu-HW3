@@ -27,7 +27,6 @@ class DenseLayer(Layer):
         return (input_shape[0], self.num_units)
 
     def get_output_for(self, input, **kwargs):
-
         activation = T.dot(input, self.W)
         if self.b is not None:
             activation = activation + self.b.dimshuffle('x', 0)
