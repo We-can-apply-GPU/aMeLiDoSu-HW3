@@ -1,4 +1,6 @@
 import theano.tensor as T
+import theano
+import numpy as np
 
 from .base import MergeLayer
 
@@ -6,7 +8,7 @@ class SummingLayer(MergeLayer):
 
     def __init__(self, incomings, f=0.5, **kwargs):
         super(SummingLayer, self).__init__(incomings, **kwargs)
-        self.f = f
+        self.f = self.add_param(theano.shared(np.float32(f)), (), name="f", regularizable=False)
 
     def get_output_shape_for(self, input_shapes):
         return input_shapes[0]

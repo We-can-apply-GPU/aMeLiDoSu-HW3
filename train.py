@@ -18,18 +18,29 @@ def norm(t):
     return T.sqrt(T.sqr(t).sum())
 
 def load_data():
-    fin = open("data/allsen", "r")
+    fin = open("data/alltest", "r")
+    w2v = word2vec.load("train_pro.txt.bin")
     data = []
-    cnt = 0
-    for line in fin:
+    lines = [line for line in fin]
+    for i, line in enumerate(lines):
+        if i%100 == 0:
+            print("{}/{}".format(i, len(lines)))
+        if i%100 != 0:
+            continue
         line = line[:-2]
         line = line.split(' ')
         """
         if "swear" not in line:
             continue
         """
-        data.append(line)
-    return np.array(data)
+        tmp = []
+        for word in line:
+            if word in w2v.vocab:
+                tmp.append(w2v[word])
+        if len(tmp) == 1:
+            continue
+        data.append(np.array(tmp, dtype="float32"))
+    return data
 
 def build_model(bi_directional = False):
 
@@ -38,18 +49,23 @@ def build_model(bi_directional = False):
             shape=(None, WORD_2_VEC_FEATURES),name="InputLayer")
 
         l_rec_forward = network.layers.RecurrentLayer(
-            l_in, num_units=NUM_HIDDEN_UNITS, trace_steps = 4, name="ForwardLayer")
+            l_in, num_units=NUM_HIDDEN_UNITS, trace_steps = 5, name="ForwardLayer")
 
         l_rec_backward = network.layers.RecurrentLayer(
             l_in, num_units=NUM_HIDDEN_UNITS, backwards=True, trace_steps = 4, name="BackwardLayer")
 
         l_sum = network.layers.SummingLayer(
-            incomings = (l_rec_forward, l_rec_backward), f = 0.8, name="SummingLayer")
+            incomings = (l_rec_forward, l_rec_backward), name="SummingLayer")
 
-        l_out = network.layers.DenseLayer(
-            incoming = l_sum, num_units = WORD_2_VEC_FEATURES, nonlinearity=None, name="OutputProjection")
+        l_out1 = network.layers.DenseLayer(
+            incoming = l_sum, num_units = 80, name="Output1")
+        l_out2 = network.layers.DenseLayer(
+            incoming = l_out1, num_units = 90, name="Output2")
+        l_out3 = network.layers.DenseLayer(
+            incoming = l_out2, num_units = WORD_2_VEC_FEATURES, nonlinearity=None, name="Output3")
 
-    return l_out
+
+    return l_out3
 
 def create_iter_functions(output_layer, learning_rate=LEARNING_RATE, momentum=MOMENTUM):
 
@@ -70,11 +86,10 @@ def create_iter_functions(output_layer, learning_rate=LEARNING_RATE, momentum=MO
 def main():
     print("Loading data...")
     data = load_data()
-    w2v = word2vec.load("train_pro.txt.bin")
 
     print("Building model")
     output_layer = build_model(bi_directional = True)
-    if sys.argv > 1:
+    if len(sys.argv) > 1:
         network.layers.set_all_param_values(output_layer, pickle.load(open("model/"+sys.argv[1], "rb")))
 
     print ('Creating iter functions')
@@ -90,11 +105,7 @@ def main():
             for cnt in range(100):
                 #seq = data[valid_set[cnt]]
                 seq = data[random.randrange(0, len(data))]
-                tmp = []
-                for word in seq:
-                    if word in w2v.vocab:
-                        tmp.append(w2v[word])
-                batch_train_loss, batch_train_accu = iter_funcs['train'](np.array(tmp, dtype="float32"))
+                batch_train_loss, batch_train_accu = iter_funcs['train'](seq)
                 batch_train_losses.append(batch_train_loss)
                 batch_train_accus.append(batch_train_accu)
             avg_train_loss = np.mean(batch_train_losses)
@@ -106,12 +117,7 @@ def main():
                 batch_valid_accus = []
                 batch_valid_losses = []
                 for cnt in range(100):
-                    seq = data[valid_set[cnt]]
-                    tmp = []
-                    for word in seq:
-                        if word in w2v.vocab:
-                            tmp.append(w2v[word])
-                    batch_valid_loss, batch_valid_accu = iter_funcs['valid'](np.array(tmp, dtype="float32"))
+                    batch_valid_loss, batch_valid_accu = iter_funcs['valid'](seq)
                     batch_valid_losses.append(batch_valid_loss)
                     batch_valid_accus.append(batch_valid_accu)
                 avg_valid_loss = np.mean(batch_valid_losses)

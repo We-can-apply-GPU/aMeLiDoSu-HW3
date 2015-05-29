@@ -49,11 +49,11 @@ def main():
         for word in line:
             if word in w2v.vocab:
                 tmp.append(w2v[word])
-        loss[index%5] = get_loss(np.array(tmp, dtype="float32"))[2]
+        loss[index%5] = get_loss(np.array(tmp, dtype="float32"))[1]
         index += 1
         if index%5==0:
-            print("{},{}".format(index/5, chr(np.argmax(loss)+ord('a'))))
-            print("{},{}".format(index/5, chr(np.argmax(loss)+ord('a'))), file=fout)
+            print("{},{}".format(index/5, chr(np.argmin(loss)+ord('a'))))
+            print("{},{}".format(index/5, chr(np.argmin(loss)+ord('a'))), file=fout)
 
 if __name__ == "__main__":
     main()

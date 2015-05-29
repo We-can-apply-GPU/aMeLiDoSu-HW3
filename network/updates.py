@@ -13,10 +13,15 @@ def get_or_compute_grads(loss_or_grads, params):
 def rnn_update(loss_or_grads, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
     grads = get_or_compute_grads(loss_or_grads, params)
     updates = OrderedDict()
-
+    tmp = theano.shared(np.float32(0))
+    cnt = theano.shared(np.float32(0))
+    for grad in grads:
+        tmp += T.sqrt((grad**2).mean())
+        cnt += 1
+    tmp /= cnt
+    prod = T.switch(T.lt(tmp, theano.shared(0.5)), theano.shared(np.float32(0.01)), theano.shared(np.float32(0.01))/tmp)
     for param, grad in zip(params, grads):
-        tmp = T.sqrt((grad**2).mean())
-        grad = T.switch(T.lt(tmp, theano.shared(0.00001)), grad, grad/tmp*0.00001)
+        grad *= prod
         value = param.get_value(borrow=True)
         accu = theano.shared(np.zeros(value.shape, dtype=value.dtype),
                              broadcastable=param.broadcastable)
