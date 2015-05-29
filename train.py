@@ -75,7 +75,7 @@ def main():
     print("Building model")
     output_layer = build_model(bi_directional = True)
     if sys.argv > 1:
-        network.layers.set_all_param_values(output_layer, pickle.load(open("model/"+sys.argv[1])))
+        network.layers.set_all_param_values(output_layer, pickle.load(open("model/"+sys.argv[1], "rb")))
 
     print ('Creating iter functions')
     iter_funcs = create_iter_functions(output_layer)
@@ -119,7 +119,7 @@ def main():
                 print("--validation loss:\t\t{:.6f}".format(avg_valid_loss))
                 print("--cosine distance:\t\t{:.4f}".format(avg_valid_accu))
                 #write model
-                fout = open("model/{:.2f}".format(avg_valid_loss), "w")
+                fout = open("model/{:.2f}".format(avg_valid_loss), "wb")
                 pickle.dump(network.layers.get_all_param_values(output_layer), fout)
                 now = time.time()
     except KeyboardInterrupt:
