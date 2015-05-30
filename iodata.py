@@ -78,10 +78,7 @@ def iodata():
     #return inlist
     #outdatalist.extend(outlist)
 
-def for_pre():
-    d = open('data/predic_data')
-    l = d.readlines();
-    z = np.zeros(100)
+def iodata_forPre():
     for i in range (0, 1040):
         _str = l[i*6].split()
         for j in range (0,5):

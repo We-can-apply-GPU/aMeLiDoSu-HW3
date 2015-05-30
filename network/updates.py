@@ -4,9 +4,6 @@ import theano
 import theano.tensor as T
 from . import utils
 
-__all__ = [
-    "rmsprop",
-]
 
 def get_or_compute_grads(loss_or_grads, params):
     if isinstance(loss_or_grads, list):
